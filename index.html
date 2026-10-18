@@ -51,21 +51,17 @@
   .icon { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
   .hidden { display: none !important; }
 
-  /* ===== Анимации ===== */
   @keyframes screenIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: none; } }
-  @keyframes screenOut { to { opacity: 0; transform: translateX(-20px); } }
   @keyframes msgIn { from { opacity: 0; transform: translateY(12px) scale(.97); } to { opacity: 1; transform: none; } }
   @keyframes popIn { from { opacity: 0; transform: scale(.9); } to { opacity: 1; transform: scale(1); } }
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
-  @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(42,171,238,.5)} 100%{box-shadow:0 0 0 12px rgba(42,171,238,0)} }
   @keyframes shimmer { 0%{background-position:-400px 0} 100%{background-position:400px 0} }
   @keyframes avatarIn { from { opacity: 0; transform: scale(.8); } to { opacity: 1; transform: scale(1); } }
+  @keyframes ringPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.08)} }
 
   .screen-anim { animation: screenIn .28s cubic-bezier(.21,1.02,.73,1); }
-  .screen-anim-out { animation: screenOut .22s ease-in; }
 
-  /* Auth */
   #auth-screen { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: 30px; overflow-y: auto; }
   #auth-screen .logo { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), #229ed9); display: flex; align-items: center; justify-content: center; color: #fff; flex-shrink: 0; animation: float 3s ease-in-out infinite, popIn .4s cubic-bezier(.21,1.02,.73,1); }
   #auth-screen .logo .icon { width: 40px; height: 40px; stroke-width: 2.5; }
@@ -77,17 +73,10 @@
   .auth-tab.active { background: var(--accent); color: white; }
   .auth-tab:active { transform: scale(.95); }
   .auth-form { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 280px; }
-  .auth-form button { padding: 12px 40px; border: none; border-radius: 24px; background: var(--accent); color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; transition: transform .15s, filter .2s; position: relative; overflow: hidden; }
+  .auth-form button { padding: 12px 40px; border: none; border-radius: 24px; background: var(--accent); color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; transition: transform .15s; }
   .auth-form button:active { transform: scale(.96); }
   #auth-error { color: #e74c3c; font-size: 13px; min-height: 18px; text-align: center; animation: fadeIn .2s; }
 
-  /* Ripple */
-  .ripple-btn { position: relative; overflow: hidden; }
-  .ripple-btn::after { content: ''; position: absolute; border-radius: 50%; background: var(--ripple); transform: scale(0); opacity: 0; pointer-events: none; }
-  .ripple-btn.rippling::after { animation: rippleAnim .6s ease-out; }
-  @keyframes rippleAnim { 0% { transform: scale(0); opacity: 1; } 100% { transform: scale(4); opacity: 0; } }
-
-  /* List */
   #list-screen { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; }
   #list-header { padding: 14px 18px; background: var(--bg-header); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
   .avatar { border-radius: 50%; background: linear-gradient(135deg, var(--accent), #229ed9); display: flex; align-items: center; justify-content: center; font-size: 18px; color: #fff; font-weight: 600; flex-shrink: 0; overflow: hidden; animation: avatarIn .3s cubic-bezier(.21,1.02,.73,1); }
@@ -116,7 +105,6 @@
   .chat-item .chat-sub { color: var(--text-muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   #list-empty { padding: 40px 20px; text-align: center; color: var(--text-muted); font-size: 14px; animation: fadeIn .4s; }
 
-  /* Skeleton */
   .skeleton { background: linear-gradient(90deg, var(--bg-input) 0%, var(--bg-input-focus) 50%, var(--bg-input) 100%); background-size: 400px 100%; animation: shimmer 1.2s infinite; border-radius: 8px; }
   .skeleton-item { padding: 12px 18px; display: flex; gap: 12px; align-items: center; border-bottom: 1px solid var(--border); }
   .skeleton-avatar { width: 46px; height: 46px; border-radius: 50%; flex-shrink: 0; }
@@ -124,7 +112,6 @@
   .skeleton-line { height: 12px; border-radius: 6px; }
   .skeleton-line.short { width: 60%; }
 
-  /* Chat */
   #chat-screen { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; }
   #header { padding: 12px 14px; background: var(--bg-header); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; flex-shrink: 0; z-index: 2; }
   #back-btn { background: none; border: none; color: var(--text-muted); padding: 6px; border-radius: 50%; cursor: pointer; display: flex; transition: background .2s, transform .15s; }
@@ -142,10 +129,8 @@
   .msg.other { align-self: flex-start; background: var(--bg-msg-other); color: var(--text-msg-other); border-bottom-left-radius: 4px; }
   .msg .name { font-size: 11px; font-weight: 600; color: var(--name-color); margin-bottom: 2px; display: flex; align-items: center; gap: 6px; }
   .msg .name .mini-avatar { width: 18px; height: 18px; border-radius: 50%; overflow: hidden; background: linear-gradient(135deg, var(--accent), #229ed9); display: flex; align-items: center; justify-content: center; font-size: 9px; color: #fff; font-weight: 700; flex-shrink: 0; }
-  .msg .name .mini-avatar img { width: 100%; height: 100%; object-fit: cover; }
   .msg .time { font-size: 10px; color: var(--text-muted); float: right; margin-left: 8px; margin-top: 4px; }
   .msg img { max-width: 100%; height: auto; border-radius: 8px; margin-top: 6px; display: block; cursor: pointer; }
-  .msg.new-pulse { animation: msgIn .35s cubic-bezier(.21,1.02,.73,1) forwards, pulse 1.2s ease-out; }
   #input-area { padding: 12px 16px; background: var(--bg-header); border-top: 1px solid var(--border); display: flex; gap: 8px; align-items: center; flex-shrink: 0; padding-bottom: max(12px, env(safe-area-inset-bottom)); }
   #attach { width: 38px; height: 38px; border: none; border-radius: 50%; background: var(--bg-input); color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .2s, transform .15s; }
   #attach:hover { background: var(--bg-input-focus); color: var(--text); }
@@ -158,7 +143,6 @@
   #send:active { transform: scale(.9); }
   #send:disabled { background: var(--bg-input-focus); color: var(--text-muted); cursor: not-allowed; }
 
-  /* Modal */
   .overlay { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: flex; justify-content: center; align-items: center; z-index: 100; animation: fadeIn .2s; padding: 20px; }
   .panel { background: var(--bg-card); border-radius: 16px; padding: 24px; width: 100%; max-width: 360px; color: var(--text); animation: popIn .25s cubic-bezier(.21,1.02,.73,1); max-height: 90vh; overflow-y: auto; }
   .panel h3 { margin-bottom: 16px; font-weight: 600; }
@@ -189,20 +173,31 @@
   .menu-item:hover { background: var(--bg-input-focus); }
   .menu-item:active { transform: scale(.98); }
 
-  /* Settings avatar */
   .settings-avatar-wrap { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 12px; }
   .settings-avatar { width: 80px; height: 80px; font-size: 28px; cursor: pointer; transition: transform .2s; }
   .settings-avatar:hover { transform: scale(1.05); }
 
-  /* Search results */
   .search-section-title { padding: 10px 18px 6px; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; color: var(--text-muted); font-weight: 700; }
   .search-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: var(--accent); color: #fff; margin-left: 6px; font-weight: 600; }
+
+  /* Call UI */
+  #call-overlay { z-index: 200; }
+  #call-overlay .panel { text-align: center; }
+  #call-avatar-wrap { display: flex; justify-content: center; margin-bottom: 12px; }
+  #call-avatar-wrap .avatar { width: 90px; height: 90px; font-size: 34px; animation: ringPulse 1.5s ease-in-out infinite; }
+  #call-timer { font-size: 32px; font-weight: 600; margin: 16px 0; letter-spacing: 1px; }
+  .call-buttons { display: flex; gap: 12px; justify-content: center; margin-top: 16px; }
+  .call-btn { width: 60px; height: 60px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform .15s; }
+  .call-btn:active { transform: scale(.9); }
+  .call-btn.accept { background: #2ecc71; color: #fff; }
+  .call-btn.decline { background: #e74c3c; color: #fff; }
+  .call-btn.hangup { background: #e74c3c; color: #fff; }
+  .call-btn .icon { width: 26px; height: 26px; stroke-width: 2.5; }
 </style>
 </head>
 <body>
 
 <div id="app">
-  <!-- AUTH -->
   <div id="auth-screen">
     <div class="logo">
       <svg class="icon" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
@@ -215,18 +210,17 @@
     <div class="auth-form" id="form-login">
       <input type="tel" id="login-phone" placeholder="Номер телефона" maxlength="20">
       <input type="password" id="login-password" placeholder="Пароль" maxlength="50">
-      <button id="login-btn" class="ripple-btn">Войти</button>
+      <button id="login-btn">Войти</button>
     </div>
     <div class="auth-form hidden" id="form-create">
       <input type="text" id="create-name" placeholder="Ваше имя" maxlength="20">
       <input type="tel" id="create-phone" placeholder="Номер телефона" maxlength="20">
       <input type="password" id="create-password" placeholder="Придумайте пароль" maxlength="50">
-      <button id="create-btn" class="ripple-btn">Создать аккаунт</button>
+      <button id="create-btn">Создать аккаунт</button>
     </div>
     <div id="auth-error"></div>
   </div>
 
-  <!-- LIST -->
   <div id="list-screen" class="hidden">
     <div id="list-header">
       <div class="avatar" id="me-avatar">?</div>
@@ -247,7 +241,6 @@
     <div id="chats"></div>
   </div>
 
-  <!-- CHAT -->
   <div id="chat-screen" class="hidden">
     <div id="header">
       <button id="back-btn">
@@ -258,6 +251,9 @@
         <div class="name" id="chat-title">Чат</div>
         <div class="status" id="chat-status">Подключение...</div>
       </div>
+      <button class="icon-btn hidden" id="call-btn" title="Позвонить">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      </button>
     </div>
     <div id="messages"></div>
     <div id="input-area">
@@ -273,13 +269,36 @@
   </div>
 </div>
 
+<!-- Call overlay -->
+<div id="call-overlay" class="overlay hidden">
+  <div class="panel">
+    <div id="call-avatar-wrap">
+      <div class="avatar" id="call-avatar">?</div>
+    </div>
+    <h3 id="call-title">Звонок</h3>
+    <div id="call-status" style="color:var(--text-muted);margin-bottom:8px;">Соединение...</div>
+    <div id="call-timer" style="display:none;">00:00</div>
+    <div class="call-buttons">
+      <button class="call-btn accept" id="call-accept" style="display:none;" title="Принять">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      </button>
+      <button class="call-btn decline" id="call-decline" title="Отклонить">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M10.68 13.31a16 16 0 0 0 3.41 2.6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7 2 2 0 0 1 1.72 2v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.42 19.42 0 0 1-3.33-2.67m-2.67-3.34a19.79 19.79 0 0 1-3.07-8.63A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91"/><line x1="23" y1="1" x2="1" y2="23"/></svg>
+      </button>
+      <button class="call-btn hangup" id="call-hangup" style="display:none;" title="Завершить">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M10.68 13.31a16 16 0 0 0 3.41 2.6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7 2 2 0 0 1 1.72 2v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.42 19.42 0 0 1-3.33-2.67m-2.67-3.34a19.79 19.79 0 0 1-3.07-8.63A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91"/><line x1="23" y1="1" x2="1" y2="23"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+<audio id="remote-audio" autoplay></audio>
+
 <script type="module">
   const SUPABASE_URL = 'https://mlmydwdpffkvopnephxb.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sbXlkd2RwZmZrdm9wbmVwaHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMDE5MzAsImV4cCI6MjEwNzg3NzkzMH0.CfBxElG-GYV7OCeMLJmzaAcQYWxu_nAglZGhGFd5hzA';
   import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  // DOM
   const authScreen = document.getElementById('auth-screen');
   const listScreen = document.getElementById('list-screen');
   const chatScreen = document.getElementById('chat-screen');
@@ -291,12 +310,12 @@
   const chatTitleEl = document.getElementById('chat-title');
   const chatAvatarEl = document.getElementById('chat-avatar');
   const searchInput = document.getElementById('search-input');
+  const callBtn = document.getElementById('call-btn');
 
   let myName = '', myPhone = '', myAvatar = '';
   let currentChatId = null, currentChatType = null;
   let channel = null, isSending = false;
   const renderedIds = new Set();
-  const userAvatarCache = {};
   let searchTimeout = null;
 
   const settings = {
@@ -305,26 +324,10 @@
     accent: localStorage.getItem('chat_accent') || '#2aabee'
   };
   applyTheme();
-
   function applyTheme() {
     document.documentElement.setAttribute('data-theme', settings.theme);
     document.documentElement.style.setProperty('--accent', settings.accent);
   }
-
-  // Ripple
-  document.addEventListener('pointerdown', e => {
-    const t = e.target.closest('.ripple-btn');
-    if (!t) return;
-    const r = t.getBoundingClientRect();
-    const size = Math.max(r.width, r.height);
-    t.style.setProperty('--ripple-x', (e.clientX - r.left - size / 2) + 'px');
-    t.style.setProperty('--ripple-y', (e.clientY - r.top - size / 2) + 'px');
-    t.classList.remove('rippling'); void t.offsetWidth; t.classList.add('rippling');
-  });
-  // Переопределяем ::after позиционирование для ripple через inline style
-  const styleRipple = document.createElement('style');
-  styleRipple.textContent = `.ripple-btn::after { width: 100%; height: 100%; top: 0; left: 0; }`;
-  document.head.appendChild(styleRipple);
 
   let audioCtx = null;
   function playPing() {
@@ -351,7 +354,6 @@
     return `<div class="avatar" style="width:${size}px;height:${size}px;">${escapeHtml(initials(name))}</div>`;
   }
 
-  // Tabs
   document.getElementById('tab-login').onclick = () => {
     document.getElementById('tab-login').classList.add('active');
     document.getElementById('tab-create').classList.remove('active');
@@ -367,7 +369,6 @@
     document.getElementById('auth-error').textContent = '';
   };
 
-  // Register
   document.getElementById('create-btn').onclick = async () => {
     const err = document.getElementById('auth-error');
     const name = document.getElementById('create-name').value.trim();
@@ -383,7 +384,6 @@
     enterApp();
   };
 
-  // Login
   document.getElementById('login-btn').onclick = async () => {
     const err = document.getElementById('auth-error');
     const phone = normalizePhone(document.getElementById('login-phone').value.trim());
@@ -397,7 +397,6 @@
     enterApp();
   };
 
-  // Auto login
   window.addEventListener('DOMContentLoaded', async () => {
     const name = localStorage.getItem('chat_name'), phone = localStorage.getItem('chat_phone');
     if (name && phone) {
@@ -420,7 +419,6 @@
     document.getElementById('me-name').textContent = myName;
   }
 
-  // Skeleton
   function showSkeleton() {
     chatsEl.innerHTML = Array.from({ length: 4 }).map(() => `
       <div class="skeleton-item">
@@ -432,7 +430,6 @@
       </div>`).join('');
   }
 
-  // Load chats
   async function loadChats() {
     showSkeleton();
     const { data: memberships, error: mErr } = await supabase
@@ -474,7 +471,6 @@
     }
   }
 
-  // Search
   searchInput.oninput = () => {
     clearTimeout(searchTimeout);
     const q = searchInput.value.trim();
@@ -489,95 +485,174 @@
       supabase.from('chats').select('*').eq('is_public', true).or(`name.ilike.${like},description.ilike.${like}`).limit(20),
       supabase.from('users').select('name, phone, avatar_url').or(`name.ilike.${like},phone.ilike.${like}`).neq('phone', myPhone).limit(20)
     ]);
-
     chatsEl.innerHTML = '';
-    const groups = groupsRes.data || [];
-    const users = usersRes.data || [];
-
-    if (!groups.length && !users.length) {
-      chatsEl.innerHTML = '<div id="list-empty">Ничего не найдено</div>';
-      return;
-    }
-
+    const groups = groupsRes.data || [], users = usersRes.data || [];
+    if (!groups.length && !users.length) { chatsEl.innerHTML = '<div id="list-empty">Ничего не найдено</div>'; return; }
     if (groups.length) {
-      const t = document.createElement('div');
-      t.className = 'search-section-title';
-      t.textContent = 'Публичные группы';
-      chatsEl.appendChild(t);
+      const t = document.createElement('div'); t.className = 'search-section-title'; t.textContent = 'Публичные группы'; chatsEl.appendChild(t);
       groups.forEach((c, i) => {
-        const div = document.createElement('div');
-        div.className = 'chat-item';
-        div.style.animationDelay = (i * 30) + 'ms';
-        div.innerHTML = `
-          ${avatarHtml(c.name, '', 46).replace('class="avatar"', 'class="avatar chat-avatar"')}
-          <div class="chat-info">
-            <div class="chat-name">${escapeHtml(c.name)}</div>
-            <div class="chat-sub">${escapeHtml(c.description || 'Публичная группа')}</div>
-          </div>`;
-        div.onclick = () => joinPublicChat(c);
-        chatsEl.appendChild(div);
+        const div = document.createElement('div'); div.className = 'chat-item'; div.style.animationDelay = (i * 30) + 'ms';
+        div.innerHTML = `${avatarHtml(c.name, '', 46).replace('class="avatar"', 'class="avatar chat-avatar"')}<div class="chat-info"><div class="chat-name">${escapeHtml(c.name)}</div><div class="chat-sub">${escapeHtml(c.description || 'Публичная группа')}</div></div>`;
+        div.onclick = () => joinPublicChat(c); chatsEl.appendChild(div);
       });
     }
     if (users.length) {
-      const t = document.createElement('div');
-      t.className = 'search-section-title';
-      t.textContent = 'Пользователи';
-      chatsEl.appendChild(t);
+      const t = document.createElement('div'); t.className = 'search-section-title'; t.textContent = 'Пользователи'; chatsEl.appendChild(t);
       users.forEach((u, i) => {
-        const div = document.createElement('div');
-        div.className = 'chat-item';
-        div.style.animationDelay = (i * 30) + 'ms';
-        div.innerHTML = `
-          ${avatarHtml(u.name, u.avatar_url, 46).replace('class="avatar"', 'class="avatar chat-avatar"')}
-          <div class="chat-info">
-            <div class="chat-name">${escapeHtml(u.name)}</div>
-            <div class="chat-sub">${escapeHtml(u.phone)}</div>
-          </div>`;
-        div.onclick = () => startDirect(u.phone);
-        chatsEl.appendChild(div);
+        const div = document.createElement('div'); div.className = 'chat-item'; div.style.animationDelay = (i * 30) + 'ms';
+        div.innerHTML = `${avatarHtml(u.name, u.avatar_url, 46).replace('class="avatar"', 'class="avatar chat-avatar"')}<div class="chat-info"><div class="chat-name">${escapeHtml(u.name)}</div><div class="chat-sub">${escapeHtml(u.phone)}</div></div>`;
+        div.onclick = () => startDirect(u.phone); chatsEl.appendChild(div);
       });
     }
   }
 
   async function joinPublicChat(chat) {
-    const { data: exists } = await supabase.from('chat_members').select('id')
-      .eq('chat_id', chat.id).eq('user_phone', myPhone).limit(1);
-    if (!exists || !exists.length) {
-      await supabase.from('chat_members').insert({ chat_id: chat.id, user_phone: myPhone });
-    }
+    const { data: exists } = await supabase.from('chat_members').select('id').eq('chat_id', chat.id).eq('user_phone', myPhone).limit(1);
+    if (!exists || !exists.length) await supabase.from('chat_members').insert({ chat_id: chat.id, user_phone: myPhone });
     searchInput.value = '';
     await loadChats();
     openChat(chat.id, chat.name || 'Группа', 'group', '');
   }
 
   async function startDirect(phone) {
-    // Проверим, нет ли уже direct
     const { data: myChats } = await supabase.from('chat_members').select('chat_id').eq('user_phone', myPhone);
     if (myChats) {
       for (const m of myChats) {
         const { data: chat } = await supabase.from('chats').select('type').eq('id', m.chat_id).single();
         if (chat && chat.type === 'direct') {
-          const { data: other } = await supabase.from('chat_members').select('user_phone')
-            .eq('chat_id', m.chat_id).eq('user_phone', phone).limit(1);
-          if (other && other.length) {
-            searchInput.value = '';
-            await loadChats();
-            return;
-          }
+          const { data: other } = await supabase.from('chat_members').select('user_phone').eq('chat_id', m.chat_id).eq('user_phone', phone).limit(1);
+          if (other && other.length) { searchInput.value = ''; await loadChats(); return; }
         }
       }
     }
     const { data: chat, error } = await supabase.from('chats').insert({ type: 'direct', created_by: myPhone }).select().single();
     if (error) return;
-    await supabase.from('chat_members').insert([
-      { chat_id: chat.id, user_phone: myPhone },
-      { chat_id: chat.id, user_phone: phone }
-    ]);
+    await supabase.from('chat_members').insert([{ chat_id: chat.id, user_phone: myPhone }, { chat_id: chat.id, user_phone: phone }]);
     searchInput.value = '';
     await loadChats();
   }
 
-  // Open chat
+  // ===== CALLS =====
+  let callChannel = null, peerConnection = null, localStream = null;
+  let callTimerInterval = null, callStartTime = null, isCallActive = false, currentPeerName = '';
+  const callOverlay = document.getElementById('call-overlay');
+  const callTitle = document.getElementById('call-title');
+  const callStatus = document.getElementById('call-status');
+  const callTimer = document.getElementById('call-timer');
+  const callAcceptBtn = document.getElementById('call-accept');
+  const callDeclineBtn = document.getElementById('call-decline');
+  const callHangupBtn = document.getElementById('call-hangup');
+  const callAvatarEl = document.getElementById('call-avatar');
+  const remoteAudio = document.getElementById('remote-audio');
+  const ICE = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }] };
+
+  function callFmt(sec) { return `${Math.floor(sec/60).toString().padStart(2,'0')}:${(sec%60).toString().padStart(2,'0')}`; }
+  function startTimer() {
+    callStartTime = Date.now(); callTimer.style.display = 'block';
+    callTimerInterval = setInterval(() => { callTimer.textContent = callFmt(Math.floor((Date.now()-callStartTime)/1000)); }, 1000);
+  }
+  function stopTimer() { if (callTimerInterval) clearInterval(callTimerInterval); callTimerInterval = null; callTimer.style.display = 'none'; callTimer.textContent = '00:00'; }
+
+  function resetCallUI() {
+    callOverlay.classList.add('hidden');
+    callAcceptBtn.style.display = 'none';
+    callHangupBtn.style.display = 'none';
+    callDeclineBtn.style.display = 'none';
+    stopTimer();
+    isCallActive = false;
+  }
+
+  async function cleanupCall() {
+    if (peerConnection) { peerConnection.ontrack = null; peerConnection.onicecandidate = null; peerConnection.onconnectionstatechange = null; peerConnection.close(); peerConnection = null; }
+    if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
+    if (callChannel) { supabase.removeChannel(callChannel); callChannel = null; }
+    remoteAudio.srcObject = null;
+    resetCallUI();
+  }
+
+  async function setupPeer(isCaller) {
+    peerConnection = new RTCPeerConnection(ICE);
+    peerConnection.ontrack = e => { remoteAudio.srcObject = e.streams[0]; };
+    peerConnection.onicecandidate = e => {
+      if (e.candidate && callChannel) callChannel.send({ type: 'broadcast', event: 'ice', payload: { candidate: e.candidate } });
+    };
+    peerConnection.onconnectionstatechange = () => {
+      if (!peerConnection) return;
+      if (peerConnection.connectionState === 'connected') { callStatus.textContent = 'Соединено'; if (!callStartTime) startTimer(); }
+      else if (peerConnection.connectionState === 'disconnected' || peerConnection.connectionState === 'failed') { callStatus.textContent = 'Связь потеряна'; setTimeout(cleanupCall, 1500); }
+    };
+    try {
+      localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+      localStream.getTracks().forEach(t => peerConnection.addTrack(t, localStream));
+      return true;
+    } catch (e) { callStatus.textContent = 'Нет доступа к микрофону'; setTimeout(cleanupCall, 2000); return false; }
+  }
+
+  async function startCall() {
+    if (isCallActive || !currentChatId || currentChatType !== 'direct') return;
+    isCallActive = true; currentPeerName = chatTitleEl.textContent;
+    callOverlay.classList.remove('hidden');
+    callTitle.textContent = currentPeerName;
+    callAvatarEl.outerHTML = avatarHtml(currentPeerName, '', 90).replace('class="avatar"', 'class="avatar" id="call-avatar"');
+    callStatus.textContent = 'Вызов...';
+    callAcceptBtn.style.display = 'none'; callHangupBtn.style.display = 'flex'; callDeclineBtn.style.display = 'none';
+
+    const ok = await setupPeer(true); if (!ok) return;
+    callChannel = supabase.channel('call-' + currentChatId, { config: { broadcast: { self: false } } });
+    callChannel
+      .on('broadcast', { event: 'answer' }, async ({ payload }) => {
+        if (peerConnection && payload.sdp) { await peerConnection.setRemoteDescription(new RTCSessionDescription(payload.sdp)); callStatus.textContent = 'Соединение...'; }
+      })
+      .on('broadcast', { event: 'ice' }, async ({ payload }) => {
+        if (peerConnection && payload.candidate) { try { await peerConnection.addIceCandidate(new RTCIceCandidate(payload.candidate)); } catch (e) {} }
+      })
+      .on('broadcast', { event: 'decline' }, () => { callStatus.textContent = 'Отклонён'; setTimeout(cleanupCall, 1200); })
+      .on('broadcast', { event: 'hangup' }, () => { callStatus.textContent = 'Завершён'; setTimeout(cleanupCall, 800); })
+      .subscribe(async status => {
+        if (status === 'SUBSCRIBED') {
+          const offer = await peerConnection.createOffer();
+          await peerConnection.setLocalDescription(offer);
+          callChannel.send({ type: 'broadcast', event: 'offer', payload: { sdp: offer, from: myName } });
+        }
+      });
+  }
+
+  function showIncoming(fromName) {
+    if (isCallActive) return;
+    isCallActive = true; currentPeerName = fromName;
+    callOverlay.classList.remove('hidden');
+    callTitle.textContent = fromName;
+    callAvatarEl.outerHTML = avatarHtml(fromName, '', 90).replace('class="avatar"', 'class="avatar" id="call-avatar"');
+    callStatus.textContent = 'Входящий звонок...';
+    callAcceptBtn.style.display = 'flex'; callDeclineBtn.style.display = 'flex'; callHangupBtn.style.display = 'none';
+    if (settings.sound) { playPing(); setTimeout(playPing, 400); }
+  }
+
+  callAcceptBtn.onclick = async () => {
+    callAcceptBtn.style.display = 'none'; callDeclineBtn.style.display = 'none'; callHangupBtn.style.display = 'flex';
+    callStatus.textContent = 'Соединение...';
+    const ok = await setupPeer(false); if (!ok) return;
+    if (window._pendingOffer) {
+      await peerConnection.setRemoteDescription(new RTCSessionDescription(window._pendingOffer));
+      const ans = await peerConnection.createAnswer();
+      await peerConnection.setLocalDescription(ans);
+      callChannel.send({ type: 'broadcast', event: 'answer', payload: { sdp: ans } });
+      window._pendingOffer = null;
+    }
+  };
+
+  callDeclineBtn.onclick = () => {
+    if (callChannel) callChannel.send({ type: 'broadcast', event: 'decline', payload: {} });
+    cleanupCall();
+  };
+  callHangupBtn.onclick = () => {
+    if (callChannel) callChannel.send({ type: 'broadcast', event: 'hangup', payload: {} });
+    cleanupCall();
+  };
+
+  callBtn.onclick = startCall;
+
+  // ===== CHAT =====
   async function openChat(chatId, title, type, avatarUrl) {
     currentChatId = chatId; currentChatType = type;
     renderedIds.clear();
@@ -585,40 +660,52 @@
     chatTitleEl.textContent = title;
     chatAvatarEl.outerHTML = avatarHtml(title, avatarUrl, 36).replace('class="avatar"', 'id="chat-avatar" class="avatar"');
     chatStatusEl.textContent = 'Загрузка...';
+    callBtn.classList.toggle('hidden', type !== 'direct');
     listScreen.classList.add('hidden');
     chatScreen.classList.remove('hidden');
     chatScreen.classList.add('screen-anim');
     inputEl.disabled = true; sendBtn.disabled = true;
 
-    const { data: history, error } = await supabase
-      .from('messages').select('*').eq('chat_id', chatId)
-      .order('created_at', { ascending: true }).limit(100);
+    if (type === 'direct') {
+      // subscribe to incoming calls for this chat
+      window._incomingChannel = supabase.channel('call-' + chatId, { config: { broadcast: { self: false } } });
+      window._incomingChannel
+        .on('broadcast', { event: 'offer' }, ({ payload }) => {
+          if (!isCallActive && payload.from && payload.from !== myName) {
+            window._pendingOffer = payload.sdp;
+            window._incomingChatId = chatId;
+            // Set up a channel to send answer from
+            callChannel = window._incomingChannel;
+            showIncoming(payload.from);
+          }
+        })
+        .on('broadcast', { event: 'ice' }, async ({ payload }) => {
+          if (peerConnection && payload.candidate) { try { await peerConnection.addIceCandidate(new RTCIceCandidate(payload.candidate)); } catch (e) {} }
+        })
+        .on('broadcast', { event: 'hangup' }, () => { if (isCallActive) { callStatus.textContent = 'Завершён'; setTimeout(cleanupCall, 800); } })
+        .subscribe();
+    }
+
+    const { data: history, error } = await supabase.from('messages').select('*').eq('chat_id', chatId).order('created_at', { ascending: true }).limit(100);
     if (error) chatStatusEl.textContent = 'История: ' + error.message;
     else if (history) history.forEach(m => {
-      if (!renderedIds.has(m.id)) {
-        renderedIds.add(m.id);
-        addMessage(m.user_name, m.text, m.user_name === myName, m.created_at, m.image_url, false);
-      }
+      if (!renderedIds.has(m.id)) { renderedIds.add(m.id); addMessage(m.user_name, m.text, m.user_name === myName, m.created_at, m.image_url); }
     });
 
     if (channel) { supabase.removeChannel(channel); channel = null; }
-    channel = supabase.channel('chat-' + chatId)
-      .on('postgres_changes', {
-        event: 'INSERT', schema: 'public', table: 'messages', filter: `chat_id=eq.${chatId}`
-      }, payload => {
+    channel = supabase.channel('msg-' + chatId)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `chat_id=eq.${chatId}` }, payload => {
         const m = payload.new;
         if (renderedIds.has(m.id)) return;
         renderedIds.add(m.id);
-        addMessage(m.user_name, m.text, m.user_name === myName, m.created_at, m.image_url, true);
+        addMessage(m.user_name, m.text, m.user_name === myName, m.created_at, m.image_url);
         if (m.user_name !== myName) playPing();
       })
       .subscribe(status => {
         if (status === 'SUBSCRIBED') {
           chatStatusEl.textContent = type === 'group' ? 'Группа' : 'Личный чат';
           inputEl.disabled = false; sendBtn.disabled = false; inputEl.focus();
-        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-          chatStatusEl.textContent = 'Переподключение...';
-        }
+        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') chatStatusEl.textContent = 'Переподключение...';
       });
 
     if (!sendBtn.dataset.bound) {
@@ -632,6 +719,8 @@
 
   document.getElementById('back-btn').onclick = () => {
     if (channel) { supabase.removeChannel(channel); channel = null; }
+    if (window._incomingChannel) { supabase.removeChannel(window._incomingChannel); window._incomingChannel = null; }
+    if (isCallActive) cleanupCall();
     currentChatId = null;
     chatScreen.classList.add('hidden');
     listScreen.classList.remove('hidden');
@@ -643,47 +732,33 @@
     const text = inputEl.value.trim();
     if (!text || isSending || !currentChatId) return;
     isSending = true; sendBtn.disabled = true; inputEl.value = '';
-    const { error } = await supabase.from('messages').insert({
-      user_name: myName, text, image_url: null, chat_id: currentChatId
-    });
+    const { error } = await supabase.from('messages').insert({ user_name: myName, text, image_url: null, chat_id: currentChatId });
     if (error) { chatStatusEl.textContent = 'Отправка: ' + error.message; inputEl.value = text; }
     isSending = false; sendBtn.disabled = false; inputEl.focus();
   }
 
   async function handleFileUpload() {
-    const fileInput = document.getElementById('file-input');
-    const file = fileInput.files[0]; fileInput.value = '';
+    const fi = document.getElementById('file-input');
+    const file = fi.files[0]; fi.value = '';
     if (!file || isSending || !currentChatId) return;
     if (!file.type.startsWith('image/')) { chatStatusEl.textContent = 'Не изображение'; return; }
-    if (file.size > 5 * 1024 * 1024) { chatStatusEl.textContent = 'Файл больше 5 МБ'; return; }
-    isSending = true; sendBtn.disabled = true;
-    chatStatusEl.textContent = 'Загрузка фото...';
+    if (file.size > 5 * 1024 * 1024) { chatStatusEl.textContent = 'Больше 5 МБ'; return; }
+    isSending = true; sendBtn.disabled = true; chatStatusEl.textContent = 'Загрузка...';
     try {
       const ext = file.name.split('.').pop() || 'jpg';
-      const path = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
-      const { error: upErr } = await supabase.storage.from('chat-images')
-        .upload(path, file, { contentType: file.type, cacheControl: '3600' });
+      const path = `${Date.now()}_${Math.random().toString(36).slice(2,8)}.${ext}`;
+      const { error: upErr } = await supabase.storage.from('chat-images').upload(path, file, { contentType: file.type, cacheControl: '3600' });
       if (upErr) { chatStatusEl.textContent = 'Фото: ' + upErr.message; return; }
       const { data: urlData } = supabase.storage.from('chat-images').getPublicUrl(path);
-      const { error: insErr } = await supabase.from('messages').insert({
-        user_name: myName, text: '', image_url: urlData.publicUrl, chat_id: currentChatId
-      });
+      const { error: insErr } = await supabase.from('messages').insert({ user_name: myName, text: '', image_url: urlData.publicUrl, chat_id: currentChatId });
       if (insErr) chatStatusEl.textContent = 'Фото: ' + insErr.message;
       else chatStatusEl.textContent = currentChatType === 'group' ? 'Группа' : 'Личный чат';
     } finally { isSending = false; sendBtn.disabled = false; inputEl.focus(); }
   }
 
-  async function getUserAvatar(phone) {
-    if (userAvatarCache[phone] !== undefined) return userAvatarCache[phone];
-    const { data } = await supabase.from('users').select('avatar_url').eq('phone', phone).single();
-    const url = data ? data.avatar_url : '';
-    userAvatarCache[phone] = url;
-    return url;
-  }
-
-  function addMessage(name, text, isSelf, createdAt, imageUrl, isNew) {
+  function addMessage(name, text, isSelf, createdAt, imageUrl) {
     const div = document.createElement('div');
-    div.className = 'msg ' + (isSelf ? 'self' : 'other') + (isNew ? ' new-pulse' : '');
+    div.className = 'msg ' + (isSelf ? 'self' : 'other');
     const time = createdAt ? new Date(createdAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }) : '';
     const nameHtml = !isSelf ? `<div class="name"><span class="mini-avatar">${escapeHtml(initials(name))}</span>${escapeHtml(name)}</div>` : '';
     const textHtml = text ? escapeHtml(text) : '';
@@ -693,151 +768,79 @@
     messagesEl.scrollTop = messagesEl.scrollHeight;
   }
 
-  // New chat modal
+  // ===== MODALS =====
   document.getElementById('new-chat-btn').onclick = () => {
-    const overlay = document.createElement('div');
-    overlay.className = 'overlay';
-    overlay.innerHTML = `
-      <div class="panel">
-        <h3>Новый чат</h3>
-        <div class="menu-list">
-          <div class="menu-item" id="menu-group">Создать группу</div>
-          <div class="menu-item" id="menu-friend">Добавить друга по номеру</div>
-        </div>
-        <button class="btn-secondary" id="menu-cancel" style="margin-top:16px;">Отмена</button>
-      </div>`;
-    document.body.appendChild(overlay);
-    overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
-    document.getElementById('menu-cancel').onclick = () => overlay.remove();
-    document.getElementById('menu-group').onclick = () => { overlay.remove(); showCreateGroup(); };
-    document.getElementById('menu-friend').onclick = () => { overlay.remove(); showAddFriend(); };
+    const ov = document.createElement('div'); ov.className = 'overlay';
+    ov.innerHTML = `<div class="panel"><h3>Новый чат</h3><div class="menu-list"><div class="menu-item" id="m-g">Создать группу</div><div class="menu-item" id="m-f">Добавить друга по номеру</div></div><button class="btn-secondary" id="m-c" style="margin-top:16px;">Отмена</button></div>`;
+    document.body.appendChild(ov);
+    ov.onclick = e => { if (e.target === ov) ov.remove(); };
+    document.getElementById('m-c').onclick = () => ov.remove();
+    document.getElementById('m-g').onclick = () => { ov.remove(); showCreateGroup(); };
+    document.getElementById('m-f').onclick = () => { ov.remove(); showAddFriend(); };
   };
 
   function showCreateGroup() {
-    const overlay = document.createElement('div');
-    overlay.className = 'overlay';
-    overlay.innerHTML = `
-      <div class="panel">
-        <h3>Создать группу</h3>
-        <input type="text" id="grp-name" placeholder="Название группы" maxlength="40">
-        <textarea id="grp-desc" placeholder="Описание (для поиска)" rows="2"></textarea>
-        <label class="check"><input type="checkbox" id="grp-public"> Публичная (видна в поиске)</label>
-        <input type="text" id="grp-members" placeholder="Номера через запятую (необязательно)">
-        <div class="err" id="grp-err"></div>
-        <button class="btn-primary" id="grp-create">Создать</button>
-        <button class="btn-secondary" id="grp-cancel">Отмена</button>
-      </div>`;
-    document.body.appendChild(overlay);
-    overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
-    document.getElementById('grp-cancel').onclick = () => overlay.remove();
-    document.getElementById('grp-create').onclick = async () => {
-      const err = document.getElementById('grp-err');
-      const name = document.getElementById('grp-name').value.trim();
-      const desc = document.getElementById('grp-desc').value.trim();
-      const isPublic = document.getElementById('grp-public').checked;
+    const ov = document.createElement('div'); ov.className = 'overlay';
+    ov.innerHTML = `<div class="panel"><h3>Создать группу</h3><input type="text" id="g-n" placeholder="Название" maxlength="40"><textarea id="g-d" placeholder="Описание (для поиска)" rows="2"></textarea><label class="check"><input type="checkbox" id="g-p"> Публичная</label><input type="text" id="g-m" placeholder="Номера через запятую"><div class="err" id="g-e"></div><button class="btn-primary" id="g-ok">Создать</button><button class="btn-secondary" id="g-c">Отмена</button></div>`;
+    document.body.appendChild(ov);
+    ov.onclick = e => { if (e.target === ov) ov.remove(); };
+    document.getElementById('g-c').onclick = () => ov.remove();
+    document.getElementById('g-ok').onclick = async () => {
+      const err = document.getElementById('g-e');
+      const name = document.getElementById('g-n').value.trim();
+      const desc = document.getElementById('g-d').value.trim();
+      const pub = document.getElementById('g-p').checked;
       if (!name) { err.textContent = 'Введите название'; return; }
-      const membersRaw = document.getElementById('grp-members').value.split(',').map(s => normalizePhone(s.trim())).filter(Boolean);
-      const { data: chat, error } = await supabase.from('chats').insert({
-        type: 'group', name, description: desc || null, is_public: isPublic, created_by: myPhone
-      }).select().single();
+      const phones = document.getElementById('g-m').value.split(',').map(s => normalizePhone(s.trim())).filter(Boolean);
+      const { data: chat, error } = await supabase.from('chats').insert({ type: 'group', name, description: desc || null, is_public: pub, created_by: myPhone }).select().single();
       if (error) { err.textContent = error.message; return; }
       await supabase.from('chat_members').insert({ chat_id: chat.id, user_phone: myPhone });
-      for (const phone of membersRaw) {
-        if (phone === myPhone) continue;
-        const { data: u } = await supabase.from('users').select('phone').eq('phone', phone).single();
-        if (u) await supabase.from('chat_members').insert({ chat_id: chat.id, user_phone: phone });
-      }
-      overlay.remove();
-      await loadChats();
+      for (const p of phones) { if (p === myPhone) continue; const { data: u } = await supabase.from('users').select('phone').eq('phone', p).single(); if (u) await supabase.from('chat_members').insert({ chat_id: chat.id, user_phone: p }); }
+      ov.remove(); await loadChats();
     };
   }
 
   function showAddFriend() {
-    const overlay = document.createElement('div');
-    overlay.className = 'overlay';
-    overlay.innerHTML = `
-      <div class="panel">
-        <h3>Добавить друга</h3>
-        <input type="tel" id="fr-phone" placeholder="Номер телефона друга">
-        <div class="err" id="fr-err"></div>
-        <button class="btn-primary" id="fr-add">Найти и создать чат</button>
-        <button class="btn-secondary" id="fr-cancel">Отмена</button>
-      </div>`;
-    document.body.appendChild(overlay);
-    overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
-    document.getElementById('fr-cancel').onclick = () => overlay.remove();
-    document.getElementById('fr-add').onclick = async () => {
-      const err = document.getElementById('fr-err');
-      const phone = normalizePhone(document.getElementById('fr-phone').value.trim());
-      if (!phone) { err.textContent = 'Введите номер'; return; }
-      if (phone === myPhone) { err.textContent = 'Это ваш номер'; return; }
-      const { data: user } = await supabase.from('users').select('name').eq('phone', phone).single();
-      if (!user) { err.textContent = 'Пользователь не найден'; return; }
-      overlay.remove();
-      await startDirect(phone);
+    const ov = document.createElement('div'); ov.className = 'overlay';
+    ov.innerHTML = `<div class="panel"><h3>Добавить друга</h3><input type="tel" id="f-p" placeholder="Номер телефона"><div class="err" id="f-e"></div><button class="btn-primary" id="f-ok">Найти</button><button class="btn-secondary" id="f-c">Отмена</button></div>`;
+    document.body.appendChild(ov);
+    ov.onclick = e => { if (e.target === ov) ov.remove(); };
+    document.getElementById('f-c').onclick = () => ov.remove();
+    document.getElementById('f-ok').onclick = async () => {
+      const err = document.getElementById('f-e');
+      const p = normalizePhone(document.getElementById('f-p').value.trim());
+      if (!p) { err.textContent = 'Введите номер'; return; }
+      if (p === myPhone) { err.textContent = 'Это ваш номер'; return; }
+      const { data: user } = await supabase.from('users').select('name').eq('phone', p).single();
+      if (!user) { err.textContent = 'Не найден'; return; }
+      ov.remove(); await startDirect(p);
     };
   }
 
-  // Settings
   document.getElementById('settings-btn').onclick = () => {
     const THEMES = [
-      { id: 'dark', name: 'Тёмная', bg: '#17212b', accent: '#2aabee' },
-      { id: 'light', name: 'Светлая', bg: '#ffffff', accent: '#2aabee' },
-      { id: 'dark-blue', name: 'Синяя', bg: '#0f1b2b', accent: '#2aabee' },
-      { id: 'dark-purple', name: 'Фиолет', bg: '#1a1426', accent: '#9b59b6' },
-      { id: 'dark-green', name: 'Зелёная', bg: '#0f1f18', accent: '#2ecc71' }
+      { id: 'dark', bg: '#17212b', accent: '#2aabee' },
+      { id: 'light', bg: '#ffffff', accent: '#2aabee' },
+      { id: 'dark-blue', bg: '#0f1b2b', accent: '#2aabee' },
+      { id: 'dark-purple', bg: '#1a1426', accent: '#9b59b6' },
+      { id: 'dark-green', bg: '#0f1f18', accent: '#2ecc71' }
     ];
-    const overlay = document.createElement('div');
-    overlay.className = 'overlay';
-    overlay.innerHTML = `
-      <div class="panel">
-        <h3>Настройки</h3>
-        <div class="settings-avatar-wrap">
-          ${avatarHtml(myName, myAvatar, 80).replace('class="avatar"', 'class="avatar settings-avatar ripple-btn" id="settings-avatar"')}
-          <button class="btn-secondary" id="change-avatar" style="width:auto;padding:8px 16px;margin:0;">Сменить аватар</button>
-          <input type="file" id="avatar-input" accept="image/*" hidden>
-        </div>
-        <div class="setting-row"><label>Звук</label><button class="toggle ${settings.sound ? 'on' : ''}" id="t-sound"></button></div>
-        <div class="setting-row" style="flex-direction:column;align-items:flex-start;gap:10px;">
-          <label>Тема</label>
-          <div class="themes" id="t-themes">${THEMES.map(t => `<button data-id="${t.id}" class="${settings.theme === t.id ? 'active' : ''}" style="--preview-bg:${t.bg};--preview-accent:${t.accent};"></button>`).join('')}</div>
-        </div>
-        <div class="setting-row" style="flex-direction:column;align-items:flex-start;gap:10px;">
-          <label>Акцент</label>
-          <div class="themes" id="t-accents">${['#2aabee','#e74c3c','#2ecc71','#9b59b6','#f39c12'].map(a => `<button data-accent="${a}" class="${settings.accent === a ? 'active' : ''}" style="--preview-bg:${a};--preview-accent:${a};"></button>`).join('')}</div>
-        </div>
-        <button class="btn-secondary" id="t-logout" style="margin-top:14px;">Выйти из аккаунта</button>
-        <button class="btn-secondary" id="t-close">Закрыть</button>
-      </div>`;
-    document.body.appendChild(overlay);
-    overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
-    document.getElementById('t-close').onclick = () => overlay.remove();
-    document.getElementById('t-sound').onclick = e => {
-      settings.sound = !settings.sound;
-      localStorage.setItem('chat_sound', settings.sound ? 'on' : 'off');
-      e.target.classList.toggle('on', settings.sound);
-      if (settings.sound) playPing();
-    };
-    overlay.querySelectorAll('#t-themes button').forEach(b => b.onclick = () => {
-      settings.theme = b.dataset.id; localStorage.setItem('chat_theme', settings.theme);
-      applyTheme(); overlay.querySelectorAll('#t-themes button').forEach(x => x.classList.remove('active')); b.classList.add('active');
-    });
-    overlay.querySelectorAll('#t-accents button').forEach(b => b.onclick = () => {
-      settings.accent = b.dataset.accent; localStorage.setItem('chat_accent', settings.accent);
-      applyTheme(); overlay.querySelectorAll('#t-accents button').forEach(x => x.classList.remove('active')); b.classList.add('active');
-    });
-    document.getElementById('t-logout').onclick = () => {
-      localStorage.removeItem('chat_name'); localStorage.removeItem('chat_phone');
-      location.reload();
-    };
-    const avatarInput = document.getElementById('avatar-input');
-    document.getElementById('change-avatar').onclick = () => avatarInput.click();
-    document.getElementById('settings-avatar').onclick = () => avatarInput.click();
-    avatarInput.onchange = async () => {
-      const file = avatarInput.files[0]; avatarInput.value = '';
-      if (!file) return;
-      if (!file.type.startsWith('image/')) { alert('Это не изображение'); return; }
-      if (file.size > 5 * 1024 * 1024) { alert('Больше 5 МБ'); return; }
+    const ov = document.createElement('div'); ov.className = 'overlay';
+    ov.innerHTML = `<div class="panel"><h3>Настройки</h3><div class="settings-avatar-wrap">${avatarHtml(myName, myAvatar, 80).replace('class="avatar"', 'class="avatar settings-avatar" id="s-av"')}<button class="btn-secondary" id="s-ch" style="width:auto;padding:8px 16px;margin:0;">Сменить аватар</button><input type="file" id="s-fi" accept="image/*" hidden></div><div class="setting-row"><label>Звук</label><button class="toggle ${settings.sound?'on':''}" id="s-snd"></button></div><div class="setting-row" style="flex-direction:column;align-items:flex-start;gap:10px;"><label>Тема</label><div class="themes" id="s-th">${THEMES.map(t=>`<button data-id="${t.id}" class="${settings.theme===t.id?'active':''}" style="--preview-bg:${t.bg};--preview-accent:${t.accent};"></button>`).join('')}</div></div><div class="setting-row" style="flex-direction:column;align-items:flex-start;gap:10px;"><label>Акцент</label><div class="themes" id="s-ac">${['#2aabee','#e74c3c','#2ecc71','#9b59b6','#f39c12'].map(a=>`<button data-accent="${a}" class="${settings.accent===a?'active':''}" style="--preview-bg:${a};--preview-accent:${a};"></button>`).join('')}</div></div><button class="btn-secondary" id="s-lo" style="margin-top:14px;">Выйти</button><button class="btn-secondary" id="s-cl">Закрыть</button></div>`;
+    document.body.appendChild(ov);
+    ov.onclick = e => { if (e.target === ov) ov.remove(); };
+    document.getElementById('s-cl').onclick = () => ov.remove();
+    document.getElementById('s-snd').onclick = e => { settings.sound = !settings.sound; localStorage.setItem('chat_sound', settings.sound?'on':'off'); e.target.classList.toggle('on', settings.sound); if (settings.sound) playPing(); };
+    ov.querySelectorAll('#s-th button').forEach(b => b.onclick = () => { settings.theme = b.dataset.id; localStorage.setItem('chat_theme', settings.theme); applyTheme(); ov.querySelectorAll('#s-th button').forEach(x=>x.classList.remove('active')); b.classList.add('active'); });
+    ov.querySelectorAll('#s-ac button').forEach(b => b.onclick = () => { settings.accent = b.dataset.accent; localStorage.setItem('chat_accent', settings.accent); applyTheme(); ov.querySelectorAll('#s-ac button').forEach(x=>x.classList.remove('active')); b.classList.add('active'); });
+    document.getElementById('s-lo').onclick = () => { localStorage.removeItem('chat_name'); localStorage.removeItem('chat_phone'); location.reload(); };
+    const fi = document.getElementById('s-fi');
+    document.getElementById('s-ch').onclick = () => fi.click();
+    document.getElementById('s-av').onclick = () => fi.click();
+    fi.onchange = async () => {
+      const file = fi.files[0]; fi.value = ''; if (!file) return;
+      if (!file.type.startsWith('image/')) { alert('Не изображение'); return; }
+      if (file.size > 5*1024*1024) { alert('Больше 5 МБ'); return; }
       const ext = file.name.split('.').pop() || 'jpg';
       const path = `avatars/${myPhone}_${Date.now()}.${ext}`;
       const { error: upErr } = await supabase.storage.from('chat-images').upload(path, file, { contentType: file.type, upsert: true });
@@ -846,20 +849,18 @@
       const { error: updErr } = await supabase.from('users').update({ avatar_url: urlData.publicUrl }).eq('phone', myPhone);
       if (updErr) { alert('Ошибка: ' + updErr.message); return; }
       myAvatar = urlData.publicUrl;
-      const newAvatar = avatarHtml(myName, myAvatar, 80).replace('class="avatar"', 'class="avatar settings-avatar ripple-btn" id="settings-avatar"');
-      document.getElementById('settings-avatar').outerHTML = newAvatar;
+      document.getElementById('s-av').outerHTML = avatarHtml(myName, myAvatar, 80).replace('class="avatar"', 'class="avatar settings-avatar" id="s-av"');
       updateMeHeader();
-      document.getElementById('settings-avatar').onclick = () => avatarInput.click();
+      document.getElementById('s-av').onclick = () => fi.click();
     };
   };
+
   if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/Ural-Messenger/sw.js', {
-      scope: '/Ural-Messenger/'
-    }).then(reg => console.log('SW зарегистрирован:', reg.scope))
-      .catch(err => console.log('SW ошибка:', err));
-  });
-}
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/Ural-Messenger/sw.js', { scope: '/Ural-Messenger/' })
+        .then(reg => console.log('SW:', reg.scope)).catch(err => console.log('SW err:', err));
+    });
+  }
 </script>
 </body>
-  </html>
+</html>
