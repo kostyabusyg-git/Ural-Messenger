@@ -932,15 +932,46 @@ $('call-hangup').onclick=()=>{if(callChannel)callChannel.send({type:'broadcast',
 if('serviceWorker'in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('/Ural-Messenger/sw.js',{scope:'/Ural-Messenger/'}).catch(()=>{})})}
 
 // ===== АДМИН-КОНСОЛЬ (ПАСХАЛКА) =====
-const ADMIN_PHONE = '+79089081190'; // ЗАМЕНИ НА СВОЙ НОМЕР
+const ADMIN_PHONE = '+79089081190'; // ТВОЙ номер
 const SECRET_WORD = 'uraladmin';
 
-document.getElementById('search-input').addEventListener('input', (e) => {
-  if (e.target.value.trim().toLowerCase() === SECRET_WORD) {
-    e.target.value = '';
-    openAdminConsole();
-  }
-});
+const searchEl = document.getElementById('search-input');
+if (searchEl) {
+  searchEl.addEventListener('input', (e) => {
+    if (e.target.value.trim().toLowerCase() === SECRET_WORD) {
+      e.target.value = '';
+      openAdminConsole();
+    }
+  });
+  searchEl.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && e.target.value.trim().toLowerCase() === SECRET_WORD) {
+      e.preventDefault();
+      e.target.value = '';
+      openAdminConsole();
+    }
+  });
+}
+
+function addAdminButton() {
+  if (myPhone !== ADMIN_PHONE) return;
+  if (document.getElementById('admin-btn')) return;
+  const header = document.getElementById('list-header');
+  if (!header) return;
+  const btn = document.createElement('button');
+  btn.id = 'admin-btn';
+  btn.className = 'icon-btn';
+  btn.title = 'Админ';
+  btn.innerHTML = '<svg class="icon" viewBox="0 0 24 24"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>';
+  btn.style.color = '#f39c12';
+  btn.onclick = openAdminConsole;
+  header.insertBefore(btn, header.querySelector('#settings-btn') || header.lastElementChild);
+}
+
+const _origEnterApp = enterApp;
+enterApp = async function() {
+  await _origEnterApp();
+  addAdminButton();
+};
 
 async function openAdminConsole() {
   if (myPhone !== ADMIN_PHONE) return;
