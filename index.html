@@ -16,14 +16,12 @@
     --bg-msg-other: #182533; --bg-msg-self: #2b5278; --bg-card: #1c2733;
     --text: #f5f5f5; --text-muted: #7d8b99; --text-msg-other: #e1e1e1; --text-msg-self: #fff;
     --border: #101921; --name-color: #6ab3f3; --scroll-thumb: #2b3a4a;
-    --ripple: rgba(255,255,255,0.25);
   }
   [data-theme="light"] {
     --bg-app: #fff; --bg-header: #f0f2f5; --bg-input: #f0f2f5; --bg-input-focus: #e4e6eb;
     --bg-msg-other: #f0f2f5; --bg-msg-self: #dcf8c6; --bg-card: #fff;
     --text: #111; --text-muted: #707579; --text-msg-other: #111; --text-msg-self: #111;
     --border: #e4e6eb; --name-color: #2aabee; --scroll-thumb: #c4c9cc;
-    --ripple: rgba(0,0,0,0.12);
   }
   [data-theme="dark-blue"] {
     --bg-app: #0f1b2b; --bg-header: #142236; --bg-input: #1b2c42; --bg-input-focus: #22374f;
@@ -59,7 +57,6 @@
   @keyframes shimmer { 0%{background-position:-400px 0} 100%{background-position:400px 0} }
   @keyframes avatarIn { from { opacity: 0; transform: scale(.8); } to { opacity: 1; transform: scale(1); } }
   @keyframes ringPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.08)} }
-
   .screen-anim { animation: screenIn .28s cubic-bezier(.21,1.02,.73,1); }
 
   #auth-screen { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: 30px; overflow-y: auto; }
@@ -148,8 +145,8 @@
   .overlay { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: flex; justify-content: center; align-items: center; z-index: 100; animation: fadeIn .2s; padding: 20px; }
   .panel { background: var(--bg-card); border-radius: 16px; padding: 24px; width: 100%; max-width: 360px; color: var(--text); animation: popIn .25s cubic-bezier(.21,1.02,.73,1); max-height: 90vh; overflow-y: auto; }
   .panel h3 { margin-bottom: 16px; font-weight: 600; }
-  .panel input, .panel textarea { width: 100%; padding: 12px 16px; border: none; border-radius: 12px; background: var(--bg-input); color: var(--text); font-size: 14px; outline: none; margin-bottom: 10px; resize: none; }
-  .panel input:focus, .panel textarea:focus { background: var(--bg-input-focus); box-shadow: 0 0 0 2px var(--accent); }
+  .panel input, .panel textarea, .panel select { width: 100%; padding: 12px 16px; border: none; border-radius: 12px; background: var(--bg-input); color: var(--text); font-size: 14px; outline: none; margin-bottom: 10px; resize: none; }
+  .panel input:focus, .panel textarea:focus, .panel select:focus { background: var(--bg-input-focus); box-shadow: 0 0 0 2px var(--accent); }
   .panel .btn-primary { width: 100%; padding: 12px; border: none; border-radius: 12px; background: var(--accent); color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 6px; transition: transform .15s; }
   .panel .btn-primary:active { transform: scale(.97); }
   .panel .btn-secondary { width: 100%; padding: 12px; border: none; border-radius: 12px; background: var(--bg-input); color: var(--text); font-size: 14px; cursor: pointer; margin-top: 8px; transition: background .2s, transform .15s; }
@@ -194,6 +191,14 @@
   .call-btn.decline { background: #e74c3c; color: #fff; }
   .call-btn.hangup { background: #e74c3c; color: #fff; }
   .call-btn .icon { width: 26px; height: 26px; stroke-width: 2.5; }
+
+  .schedule-item { padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .schedule-item:last-child { border-bottom: none; }
+  .schedule-item .head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+  .schedule-item .type { font-weight: 600; color: var(--accent); font-size: 13px; }
+  .schedule-item .date { font-size: 10px; color: var(--text-muted); }
+  .schedule-item .body { font-size: 14px; white-space: pre-wrap; word-break: break-word; }
+  .schedule-item img { max-width: 100%; border-radius: 8px; margin-top: 6px; }
 </style>
 </head>
 <body>
@@ -229,6 +234,9 @@
         <div class="name" id="me-name">Пользователь</div>
         <div class="status" id="me-status">Список чатов</div>
       </div>
+      <button class="icon-btn" id="schedule-btn" title="Расписание / ДЗ">
+        <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      </button>
       <button class="icon-btn" id="settings-btn" title="Настройки">
         <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       </button>
@@ -344,7 +352,6 @@
     } catch (e) {}
   }
 
-  // Нормализация: всегда +7XXXXXXXXXX (11 цифр)
   function normalizePhone(p) {
     let digits = String(p).replace(/[^0-9]/g, '');
     if (digits.length === 11 && digits.startsWith('8')) digits = '7' + digits.slice(1);
@@ -416,6 +423,7 @@
     listScreen.classList.remove('hidden');
     listScreen.classList.add('screen-anim');
     updateMeHeader();
+    setupGlobalCallListener();
     await loadChats();
   }
 
@@ -520,7 +528,6 @@
     openChat(chat.id, chat.name || 'Группа', 'group', '');
   }
 
-  // 🔧 ИСПРАВЛЕНО: проверка существующего direct-чата
   async function findDirectChat(peerPhone) {
     const { data: myChats } = await supabase.from('chat_members').select('chat_id').eq('user_phone', myPhone);
     if (!myChats) return null;
@@ -538,11 +545,7 @@
     const normalized = normalizePhone(phone);
     if (normalized === myPhone) return;
     const existingId = await findDirectChat(normalized);
-    if (existingId) {
-      searchInput.value = '';
-      await loadChats();
-      return;
-    }
+    if (existingId) { searchInput.value = ''; await loadChats(); return; }
     const { data: chat, error } = await supabase.from('chats').insert({ type: 'direct', created_by: myPhone }).select().single();
     if (error) return;
     await supabase.from('chat_members').insert([
@@ -565,7 +568,16 @@
   const callHangupBtn = document.getElementById('call-hangup');
   const callAvatarEl = document.getElementById('call-avatar');
   const remoteAudio = document.getElementById('remote-audio');
-  const ICE = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }] };
+
+  const ICE = {
+    iceServers: [
+      { urls: 'stun:stun.relay.metered.ca:80' },
+      { urls: 'turn:global.relay.metered.ca:80', username: 'f142d15a30fab21c8028169a', credential: '8u1HQJ6Ms1cmybhb' },
+      { urls: 'turn:global.relay.metered.ca:80?transport=tcp', username: 'f142d15a30fab21c8028169a', credential: '8u1HQJ6Ms1cmybhb' },
+      { urls: 'turn:global.relay.metered.ca:443', username: 'f142d15a30fab21c8028169a', credential: '8u1HQJ6Ms1cmybhb' },
+      { urls: 'turns:global.relay.metered.ca:443?transport=tcp', username: 'f142d15a30fab21c8028169a', credential: '8u1HQJ6Ms1cmybhb' }
+    ]
+  };
 
   function callFmt(sec) { return `${Math.floor(sec/60).toString().padStart(2,'0')}:${(sec%60).toString().padStart(2,'0')}`; }
   function startTimer() {
@@ -591,7 +603,7 @@
     resetCallUI();
   }
 
-  async function setupPeer(isCaller) {
+  async function setupPeer() {
     peerConnection = new RTCPeerConnection(ICE);
     peerConnection.ontrack = e => { remoteAudio.srcObject = e.streams[0]; };
     peerConnection.onicecandidate = e => {
@@ -609,6 +621,11 @@
     } catch (e) { callStatus.textContent = 'Нет доступа к микрофону'; setTimeout(cleanupCall, 2000); return false; }
   }
 
+  async function getPeerPhone(chatId) {
+    const { data } = await supabase.from('chat_members').select('user_phone').eq('chat_id', chatId).neq('user_phone', myPhone).limit(1);
+    return data && data[0] ? data[0].user_phone : null;
+  }
+
   async function startCall() {
     if (isCallActive || !currentChatId || currentChatType !== 'direct') return;
     isCallActive = true; currentPeerName = chatTitleEl.textContent;
@@ -618,8 +635,12 @@
     callStatus.textContent = 'Вызов...';
     callAcceptBtn.style.display = 'none'; callHangupBtn.style.display = 'flex'; callDeclineBtn.style.display = 'none';
 
-    const ok = await setupPeer(true); if (!ok) return;
-    callChannel = supabase.channel('call-' + currentChatId, { config: { broadcast: { self: false } } });
+    const ok = await setupPeer(); if (!ok) return;
+
+    const peerPhone = await getPeerPhone(currentChatId);
+    if (!peerPhone) { callStatus.textContent = 'Собеседник не найден'; setTimeout(cleanupCall, 1500); return; }
+
+    callChannel = supabase.channel('user-' + peerPhone, { config: { broadcast: { self: false } } });
     callChannel
       .on('broadcast', { event: 'answer' }, async ({ payload }) => {
         if (peerConnection && payload.sdp) { await peerConnection.setRemoteDescription(new RTCSessionDescription(payload.sdp)); callStatus.textContent = 'Соединение...'; }
@@ -633,12 +654,34 @@
         if (status === 'SUBSCRIBED') {
           const offer = await peerConnection.createOffer();
           await peerConnection.setLocalDescription(offer);
-          callChannel.send({ type: 'broadcast', event: 'offer', payload: { sdp: offer, from: myName } });
+          callChannel.send({
+            type: 'broadcast', event: 'incoming-call',
+            payload: { to: peerPhone, from: myName, fromPhone: myPhone, sdp: offer, chatId: currentChatId }
+          });
         }
       });
   }
 
-  function showIncoming(fromName) {
+  function setupGlobalCallListener() {
+    if (window._globalCallChannel) supabase.removeChannel(window._globalCallChannel);
+    window._globalCallChannel = supabase.channel('user-' + myPhone, { config: { broadcast: { self: false } } });
+    window._globalCallChannel
+      .on('broadcast', { event: 'incoming-call' }, async ({ payload }) => {
+        if (isCallActive || payload.to !== myPhone) return;
+        window._pendingOffer = payload.sdp;
+        window._incomingChatId = payload.chatId;
+        window._incomingFrom = payload.from;
+        window._incomingFromPhone = payload.fromPhone;
+        callChannel = window._globalCallChannel;
+        await showIncoming(payload.from, payload.fromPhone);
+      })
+      .on('broadcast', { event: 'ice' }, async ({ payload }) => {
+        if (peerConnection && payload.candidate) { try { await peerConnection.addIceCandidate(new RTCIceCandidate(payload.candidate)); } catch (e) {} }
+      })
+      .subscribe();
+  }
+
+  async function showIncoming(fromName, fromPhone) {
     if (isCallActive) return;
     isCallActive = true; currentPeerName = fromName;
     callOverlay.classList.remove('hidden');
@@ -652,7 +695,7 @@
   callAcceptBtn.onclick = async () => {
     callAcceptBtn.style.display = 'none'; callDeclineBtn.style.display = 'none'; callHangupBtn.style.display = 'flex';
     callStatus.textContent = 'Соединение...';
-    const ok = await setupPeer(false); if (!ok) return;
+    const ok = await setupPeer(); if (!ok) return;
     if (window._pendingOffer) {
       await peerConnection.setRemoteDescription(new RTCSessionDescription(window._pendingOffer));
       const ans = await peerConnection.createAnswer();
@@ -687,23 +730,6 @@
     chatScreen.classList.add('screen-anim');
     inputEl.disabled = true; sendBtn.disabled = true;
 
-    if (type === 'direct') {
-      window._incomingChannel = supabase.channel('call-' + chatId, { config: { broadcast: { self: false } } });
-      window._incomingChannel
-        .on('broadcast', { event: 'offer' }, ({ payload }) => {
-          if (!isCallActive && payload.from && payload.from !== myName) {
-            window._pendingOffer = payload.sdp;
-            callChannel = window._incomingChannel;
-            showIncoming(payload.from);
-          }
-        })
-        .on('broadcast', { event: 'ice' }, async ({ payload }) => {
-          if (peerConnection && payload.candidate) { try { await peerConnection.addIceCandidate(new RTCIceCandidate(payload.candidate)); } catch (e) {} }
-        })
-        .on('broadcast', { event: 'hangup' }, () => { if (isCallActive) { callStatus.textContent = 'Завершён'; setTimeout(cleanupCall, 800); } })
-        .subscribe();
-    }
-
     const { data: history, error } = await supabase.from('messages').select('*').eq('chat_id', chatId).order('created_at', { ascending: true }).limit(100);
     if (error) chatStatusEl.textContent = 'История: ' + error.message;
     else if (history) history.forEach(m => {
@@ -737,7 +763,6 @@
 
   document.getElementById('back-btn').onclick = () => {
     if (channel) { supabase.removeChannel(channel); channel = null; }
-    if (window._incomingChannel) { supabase.removeChannel(window._incomingChannel); window._incomingChannel = null; }
     if (isCallActive) cleanupCall();
     currentChatId = null;
     chatScreen.classList.add('hidden');
@@ -785,6 +810,72 @@
     messagesEl.appendChild(div);
     messagesEl.scrollTop = messagesEl.scrollHeight;
   }
+
+  // ===== SCHEDULE / HOMEWORK =====
+  document.getElementById('schedule-btn').onclick = async () => {
+    const { data: memberships } = await supabase.from('chat_members').select('chat_id').eq('user_phone', myPhone);
+    if (!memberships || !memberships.length) { alert('Сначала создай или найди чат'); return; }
+    const ids = [...new Set(memberships.map(m => m.chat_id))];
+    const { data: chats } = await supabase.from('chats').select('id, name, type').in('id', ids);
+    if (!chats || !chats.length) { alert('Нет чатов'); return; }
+
+    const ov = document.createElement('div'); ov.className = 'overlay';
+    const opts = chats.map(c => `<option value="${c.id}">${escapeHtml(c.name || (c.type==='direct'?'Личный чат':'Группа'))}</option>`).join('');
+    ov.innerHTML = `<div class="panel"><h3>Расписание / ДЗ</h3>
+      <select id="sch-chat">${opts}</select>
+      <select id="sch-type"><option value="schedule">Расписание</option><option value="homework">Домашнее задание</option></select>
+      <textarea id="sch-text" placeholder="Текст (необязательно)" rows="3"></textarea>
+      <input type="file" id="sch-file" accept="image/*" style="display:none;">
+      <button class="btn-secondary" id="sch-pick" style="margin-bottom:8px;">Прикрепить фото</button>
+      <div id="sch-preview" style="color:var(--text-muted);font-size:12px;margin-bottom:8px;"></div>
+      <button class="btn-primary" id="sch-save">Опубликовать</button>
+      <button class="btn-secondary" id="sch-view">Посмотреть</button>
+      <button class="btn-secondary" id="sch-cancel">Отмена</button>
+    </div>`;
+    document.body.appendChild(ov);
+    ov.onclick = e => { if (e.target === ov) ov.remove(); };
+    document.getElementById('sch-cancel').onclick = () => ov.remove();
+
+    const fileInput = document.getElementById('sch-file');
+    let uploadedUrl = '';
+    document.getElementById('sch-pick').onclick = () => fileInput.click();
+    fileInput.onchange = async () => {
+      const file = fileInput.files[0]; if (!file) return;
+      if (!file.type.startsWith('image/')) { alert('Не изображение'); return; }
+      if (file.size > 5*1024*1024) { alert('Больше 5 МБ'); return; }
+      const ext = file.name.split('.').pop() || 'jpg';
+      const path = `schedule/${Date.now()}_${Math.random().toString(36).slice(2,8)}.${ext}`;
+      const { error } = await supabase.storage.from('chat-images').upload(path, file, { contentType: file.type });
+      if (error) { alert('Ошибка: ' + error.message); return; }
+      uploadedUrl = supabase.storage.from('chat-images').getPublicUrl(path).data.publicUrl;
+      document.getElementById('sch-preview').textContent = 'Фото прикреплено';
+    };
+    document.getElementById('sch-save').onclick = async () => {
+      const chatId = document.getElementById('sch-chat').value;
+      const type = document.getElementById('sch-type').value;
+      const text = document.getElementById('sch-text').value.trim();
+      if (!text && !uploadedUrl) { alert('Добавь текст или фото'); return; }
+      const { error } = await supabase.from('schedule').insert({ chat_id: chatId, type, content: text || null, image_url: uploadedUrl || null, created_by: myPhone });
+      if (error) { alert('Ошибка: ' + error.message); return; }
+      ov.remove(); alert('Опубликовано!');
+    };
+    document.getElementById('sch-view').onclick = async () => {
+      const chatId = document.getElementById('sch-chat').value;
+      const { data } = await supabase.from('schedule').select('*').eq('chat_id', chatId).order('created_at', { ascending: false }).limit(30);
+      if (!data || !data.length) { alert('Пока пусто'); return; }
+      const html = data.map(s => `
+        <div class="schedule-item">
+          <div class="head"><span class="type">${s.type==='schedule'?'📅 Расписание':'📚 ДЗ'}</span><span class="date">${new Date(s.created_at).toLocaleString('ru-RU')}</span></div>
+          ${s.content ? `<div class="body">${escapeHtml(s.content)}</div>` : ''}
+          ${s.image_url ? `<img src="${escapeHtml(s.image_url)}" loading="lazy">` : ''}
+        </div>`).join('');
+      const viewOv = document.createElement('div'); viewOv.className = 'overlay';
+      viewOv.innerHTML = `<div class="panel" style="max-height:85vh;overflow-y:auto;">${html}<button class="btn-secondary" id="sch-close">Закрыть</button></div>`;
+      document.body.appendChild(viewOv);
+      viewOv.onclick = e => { if (e.target === viewOv) viewOv.remove(); };
+      document.getElementById('sch-close').onclick = () => viewOv.remove();
+    };
+  };
 
   // ===== MODALS =====
   document.getElementById('new-chat-btn').onclick = () => {
