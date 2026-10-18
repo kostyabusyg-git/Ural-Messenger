@@ -929,9 +929,78 @@ $('call-accept').onclick=async()=>{
 };
 $('call-decline').onclick=()=>{if(callChannel)callChannel.send({type:'broadcast',event:'decline',payload:{}});cleanupCall()};
 $('call-hangup').onclick=()=>{if(callChannel)callChannel.send({type:'broadcast',event:'hangup',payload:{}});cleanupCall()};
-$('call-btn').onclick=startCall;
-
 if('serviceWorker'in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('/Ural-Messenger/sw.js',{scope:'/Ural-Messenger/'}).catch(()=>{})})}
+
+// ===== АДМИН-КОНСОЛЬ (ПАСХАЛКА) =====
+const ADMIN_PHONE = '+79089081190'; // ЗАМЕНИ НА СВОЙ НОМЕР
+const SECRET_WORD = 'uraladmin';
+
+document.getElementById('search-input').addEventListener('input', (e) => {
+  if (e.target.value.trim().toLowerCase() === SECRET_WORD) {
+    e.target.value = '';
+    openAdminConsole();
+  }
+});
+
+async function openAdminConsole() {
+  if (myPhone !== ADMIN_PHONE) return;
+  const ov = document.createElement('div');
+  ov.className = 'overlay';
+  ov.innerHTML = `<div class="panel" style="max-height:85vh;overflow-y:auto;">
+    <h3>🛠 Админ-консоль</h3>
+    <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">Всего пользователей: <span id="adm-count">...</span></div>
+    <div id="adm-list" style="max-height:400px;overflow-y:auto;"></div>
+    <button class="btn-secondary" id="adm-clean" style="color:#e74c3c;margin-top:10px;">Удалить всех, кроме меня</button>
+    <button class="btn-secondary" id="adm-close">Закрыть</button>
+  </div>`;
+  document.body.appendChild(ov);
+  ov.onclick = e => { if (e.target === ov) ov.remove(); };
+  document.getElementById('adm-close').onclick = () => ov.remove();
+
+  const { data: users } = await supabase.from('users_public').select('name, phone, avatar_url');
+  document.getElementById('adm-count').textContent = users ? users.length : 0;
+  const list = document.getElementById('adm-list');
+  list.innerHTML = '';
+  if (users) {
+    users.forEach(u => {
+      const div = document.createElement('div');
+      div.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;';
+      div.innerHTML = `<span>${escapeHtml(u.name)} <small style="color:var(--text-muted)">${escapeHtml(u.phone)}</small></span>
+        ${u.phone !== ADMIN_PHONE ? `<button style="background:none;border:none;color:#e74c3c;cursor:pointer;font-size:16px;" data-del="${u.phone}">✕</button>` : '<span style="color:var(--online);font-size:11px;">вы</span>'}`;
+      list.appendChild(div);
+    });
+    list.querySelectorAll('[data-del]').forEach(b => b.onclick = async () => {
+      if (!confirm('Удалить пользователя ' + b.dataset.del + '?')) return;
+      await supabase.from('chat_members').delete().eq('user_phone', b.dataset.del);
+      await supabase.from('local_names').delete().eq('owner_phone', b.dataset.del);
+      await supabase.from('local_names').delete().eq('target_phone', b.dataset.del);
+      await supabase.from('messages').delete().eq('user_name', b.dataset.del);
+      await supabase.from('users').delete().eq('phone', b.dataset.del);
+      ov.remove();
+      openAdminConsole();
+    });
+  }
+
+  document.getElementById('adm-clean').onclick = async () => {
+    if (!confirm('Удалить ВСЕХ пользователей, кроме вас? Это необратимо!')) return;
+    if (!confirm('Точно? Все чаты и сообщения тоже удалятся.')) return;
+    const { data: allUsers } = await supabase.from('users_public').select('phone');
+    if (allUsers) {
+      for (const u of allUsers) {
+        if (u.phone === ADMIN_PHONE) continue;
+        await supabase.from('chat_members').delete().eq('user_phone', u.phone);
+        await supabase.from('local_names').delete().eq('owner_phone', u.phone);
+        await supabase.from('local_names').delete().eq('target_phone', u.phone);
+        await supabase.from('users').delete().eq('phone', u.phone);
+      }
+    }
+    await supabase.from('chats').delete().eq('type', 'direct');
+    ov.remove();
+    alert('Готово');
+    location.reload();
+  };
+}
+// ===== КОНЕЦ АДМИН-КОНСОЛИ =====
 </script>
 </body>
 </html>
