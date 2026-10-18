@@ -139,8 +139,8 @@
     <div class="logo"><svg class="icon" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></div>
     <h2>Ural Messenger</h2>
     <div class="auth-tabs"><button class="auth-tab active" id="tab-login">Войти</button><button class="auth-tab" id="tab-create">Регистрация</button></div>
-    <div class="auth-form" id="form-login"><input type="tel" id="login-phone" placeholder="Номер" maxlength="20"><input type="password" id="login-password" placeholder="Пароль" maxlength="50"><button id="login-btn">Войти</button></div>
-    <div class="auth-form hidden" id="form-create"><input type="text" id="create-name" placeholder="Имя" maxlength="20"><input type="tel" id="create-phone" placeholder="Номер" maxlength="20"><input type="password" id="create-password" placeholder="Пароль" maxlength="50"><button id="create-btn">Создать</button></div>
+    <div class="auth-form" id="form-login"><input type="tel" id="login-phone" placeholder="+7 XXX XXX-XX-XX" maxlength="18"><input type="password" id="login-password" placeholder="Пароль" maxlength="50"><button id="login-btn">Войти</button></div>
+    <div class="auth-form hidden" id="form-create"><input type="text" id="create-name" placeholder="Имя" maxlength="20"><input type="tel" id="create-phone" placeholder="+7 XXX XXX-XX-XX" maxlength="18"><input type="password" id="create-password" placeholder="Пароль" maxlength="50"><button id="create-btn">Создать</button></div>
     <div id="auth-error"></div>
   </div>
   <div id="list-screen" class="hidden">
@@ -198,6 +198,43 @@ let channel=null,presenceChannel=null,isSending=false,typingTimeout=null;
 const renderedIds=new Set();
 const onlineUsers=new Set();
 
+// Матерные корни (русские + английские)
+const BAD_WORDS=['бля','бляд','блят','хуй','хуя','хуе','хуи','пизд','пизж','еба','ебал','ебан','ебан','ебуч','ебет','ебет','ебись','ебет','сук','сука','суки','суч','муд','муда','муди','пидор','пидар','педик','гандон','ганд','залуп','долбо','долба','хер','херн','хрен','гнид','мраз','тварь','шалав','шлюх','говн','дерьм','жоп','жоп','срак','срал','срат','перд','fuck','fuk','shit','bitch','dick','pussy','cunt','asshole','bastard','whore','slut'];
+function hasBadWord(text){
+  const lower=String(text).toLowerCase().replace(/[^а-яёa-z0-9]/g,'');
+  return BAD_WORDS.some(w=>lower.includes(w));
+}
+
+// Валидация РФ номера: на входе 8XXXXXXXXXX или +7XXXXXXXXXX или 7XXXXXXXXXX (11 цифр)
+function normalizePhone(p){
+  let d=String(p).replace(/[^0-9]/g,'');
+  if(d.length===11&&d.startsWith('8'))d='7'+d.slice(1);
+  if(d.length===10)d='7'+d;
+  if(d.length!==11||!d.startsWith('7'))return null;
+  return '+' + d;
+}
+function isValidRussianPhone(p){
+  const n=normalizePhone(p);
+  return n && /^\+7\d{10}$/.test(n);
+}
+// Форматирование для input
+function formatPhoneInput(v){
+  let d=String(v).replace(/[^0-9]/g,'');
+  if(d.startsWith('8'))d='7'+d.slice(1);
+  if(!d.startsWith('7'))d='7'+d;
+  d=d.slice(0,11);
+  let out='+7';
+  if(d.length>1)out+=' '+d.slice(1,4);
+  if(d.length>4)out+=' '+d.slice(4,7);
+  if(d.length>7)out+='-'+d.slice(7,9);
+  if(d.length>9)out+='-'+d.slice(9,11);
+  return out;
+}
+
+function escapeHtml(s){return String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
+function initials(n){return(n||'?').trim().charAt(0).toUpperCase()||'?'}
+function avatarHtml(name,url,size){if(url)return`<div class="avatar" style="width:${size}px;height:${size}px;"><img src="${escapeHtml(url)}"></div>`;return`<div class="avatar" style="width:${size}px;height:${size}px;">${escapeHtml(initials(name))}</div>`}
+
 const settings={sound:localStorage.getItem('chat_sound')!=='off',theme:localStorage.getItem('chat_theme')||'dark',accent:localStorage.getItem('chat_accent')||'#2aabee'};
 applyTheme();
 function applyTheme(){document.documentElement.setAttribute('data-theme',settings.theme);document.documentElement.style.setProperty('--accent',settings.accent);}
@@ -205,18 +242,31 @@ function applyTheme(){document.documentElement.setAttribute('data-theme',setting
 let audioCtx=null;
 function playPing(){if(!settings.sound)return;try{if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='sine';o.frequency.setValueAtTime(880,audioCtx.currentTime);o.frequency.exponentialRampToValueAtTime(660,audioCtx.currentTime+.15);g.gain.setValueAtTime(.0001,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.15,audioCtx.currentTime+.01);g.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+.3);o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+.3)}catch(e){}}
 
-function normalizePhone(p){let d=String(p).replace(/[^0-9]/g,'');if(d.length===11&&d.startsWith('8'))d='7'+d.slice(1);if(d.length===10)d='7'+d;return '+' + d;}
-function escapeHtml(s){return String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
-function initials(n){return(n||'?').trim().charAt(0).toUpperCase()||'?'}
-function avatarHtml(name,url,size){if(url)return`<div class="avatar" style="width:${size}px;height:${size}px;"><img src="${escapeHtml(url)}"></div>`;return`<div class="avatar" style="width:${size}px;height:${size}px;">${escapeHtml(initials(name))}</div>`}
+// ===== Автоформат телефона в полях =====
+['login-phone','create-phone'].forEach(id=>{
+  const el=$(id);
+  if(!el)return;
+  el.addEventListener('input',()=>{
+    const pos=el.selectionStart;
+    const before=el.value.length;
+    el.value=formatPhoneInput(el.value);
+    const after=el.value.length;
+    const diff=after-before;
+    try{el.setSelectionRange(pos+diff,pos+diff)}catch(e){}
+  });
+});
 
+// ===== AUTH =====
 $('tab-login').onclick=()=>{$('tab-login').classList.add('active');$('tab-create').classList.remove('active');$('form-login').classList.remove('hidden');$('form-create').classList.add('hidden');$('auth-error').textContent=''};
 $('tab-create').onclick=()=>{$('tab-create').classList.add('active');$('tab-login').classList.remove('active');$('form-create').classList.remove('hidden');$('form-login').classList.add('hidden');$('auth-error').textContent=''};
 
 $('create-btn').onclick=async()=>{
-  const err=$('auth-error'),name=$('create-name').value.trim(),phone=normalizePhone($('create-phone').value.trim()),pass=$('create-password').value.trim();
-  if(!name||!phone||!pass){err.textContent='Заполните все поля';return}
-  if(phone.length!==12){err.textContent='Номер: 11 цифр';return}
+  const err=$('auth-error'),name=$('create-name').value.trim(),phoneRaw=$('create-phone').value.trim(),pass=$('create-password').value.trim();
+  if(!name||!phoneRaw||!pass){err.textContent='Заполните все поля';return}
+  if(name.length<2){err.textContent='Имя минимум 2 символа';return}
+  if(hasBadWord(name)){err.textContent='Имя содержит запрещённые слова';return}
+  const phone=normalizePhone(phoneRaw);
+  if(!phone||!isValidRussianPhone(phone)){err.textContent='Только российский номер: +7 XXX XXX-XX-XX';return}
   if(pass.length<4){err.textContent='Пароль минимум 4';return}
   const{error}=await supabase.from('users').insert({name,phone,password:pass});
   if(error){err.textContent=error.code==='23505'?'Номер занят':error.message;return}
@@ -226,8 +276,10 @@ $('create-btn').onclick=async()=>{
 };
 
 $('login-btn').onclick=async()=>{
-  const err=$('auth-error'),phone=normalizePhone($('login-phone').value.trim()),pass=$('login-password').value.trim();
-  if(!phone||!pass){err.textContent='Заполните поля';return}
+  const err=$('auth-error'),phoneRaw=$('login-phone').value.trim(),pass=$('login-password').value.trim();
+  const phone=normalizePhone(phoneRaw);
+  if(!phone||!isValidRussianPhone(phone)){err.textContent='Только российский номер: +7 XXX XXX-XX-XX';return}
+  if(!pass){err.textContent='Введите пароль';return}
   const{data,error}=await supabase.from('users').select('name,password,avatar_url').eq('phone',phone).single();
   if(error||!data){err.textContent='Не найден';return}
   if(data.password!==pass){err.textContent='Неверный пароль';return}
@@ -238,7 +290,11 @@ $('login-btn').onclick=async()=>{
 
 window.addEventListener('DOMContentLoaded',async()=>{
   const name=localStorage.getItem('chat_name'),phone=localStorage.getItem('chat_phone');
-  if(name&&phone){const{data}=await supabase.from('users').select('name,avatar_url').eq('phone',phone).single();if(data){myName=data.name;myPhone=phone;myAvatar=data.avatar_url||'';enterApp()}}
+  if(name&&phone&&isValidRussianPhone(phone)){
+    const{data}=await supabase.from('users').select('name,avatar_url').eq('phone',phone).single();
+    if(data){myName=data.name;myPhone=phone;myAvatar=data.avatar_url||'';enterApp()}
+    else{localStorage.removeItem('chat_name');localStorage.removeItem('chat_phone')}
+  }
 });
 
 async function enterApp(){
@@ -369,7 +425,8 @@ async function findDirectChat(peerPhone){
 }
 
 async function startDirect(phone){
-  const n=normalizePhone(phone);if(n===myPhone)return;
+  const n=normalizePhone(phone);if(!n||!isValidRussianPhone(n))return;
+  if(n===myPhone)return;
   const ex=await findDirectChat(n);if(ex){$('search-input').value='';await loadChats();return}
   const{data:chat,error}=await supabase.from('chats').insert({type:'direct',created_by:myPhone,status:'pending'}).select().single();
   if(error)return;
@@ -390,7 +447,6 @@ async function openChat(chatId,title,type,avatarUrl,peerPhone,status){
   $('list-screen').classList.add('hidden');$('chat-screen').classList.remove('hidden');$('chat-screen').classList.add('screen-anim');
   $('input').disabled=true;$('send').disabled=true;
 
-  // Проверяем, кто создатель
   let isCreator=false;
   if(isPending){
     const{data:chatData}=await supabase.from('chats').select('created_by').eq('id',chatId).single();
@@ -473,7 +529,7 @@ $('back-btn').onclick=()=>{
 async function sendMessage(){
   const text=$('input').value.trim();
   if(!text||isSending||!currentChatId)return;
-  // Проверка статуса
+  if(hasBadWord(text)){$('chat-status').textContent='Сообщение содержит запрещённые слова';return}
   const{data:cd}=await supabase.from('chats').select('status').eq('id',currentChatId).single();
   if(cd&&cd.status==='pending'){$('chat-status').textContent='Чат не подтверждён';return}
   isSending=true;$('send').disabled=true;$('input').value='';
@@ -528,6 +584,7 @@ async function renameChat(peerPhone){
   $('rn-save').onclick=async()=>{
     const name=$('rn-input').value.trim();
     if(!name){$('rn-err').textContent='Введите имя';return}
+    if(hasBadWord(name)){$('rn-err').textContent='Имя содержит запрещённые слова';return}
     const{data:existing}=await supabase.from('local_names').select('id').eq('owner_phone',myPhone).eq('target_phone',peerPhone).limit(1);
     if(existing&&existing.length)await supabase.from('local_names').update({custom_name:name}).eq('id',existing[0].id);
     else await supabase.from('local_names').insert({owner_phone:myPhone,target_phone:peerPhone,custom_name:name});
@@ -562,13 +619,16 @@ $('group-settings-btn').onclick=async()=>{
     <button class="btn-primary" id="grp-save">Сохранить</button>
     <h3 style="margin-top:16px;font-size:14px;">Участники (${members?members.length:0})</h3>
     <div id="grp-members-list" style="max-height:200px;overflow-y:auto;"></div>
-    ${isCreator?`<input type="tel" id="grp-add" placeholder="Номер для добавления" style="margin-top:8px;"><button class="btn-secondary" id="grp-add-btn">Добавить</button>`:''}
+    ${isCreator?`<input type="tel" id="grp-add" placeholder="+7 XXX XXX-XX-XX" maxlength="18" style="margin-top:8px;"><button class="btn-secondary" id="grp-add-btn">Добавить</button>`:''}
     <button class="btn-secondary" id="grp-leave" style="color:#e74c3c;">Выйти из группы</button>
     <button class="btn-secondary" id="grp-close">Закрыть</button>
   </div>`;
   document.body.appendChild(ov);
   ov.onclick=e=>{if(e.target===ov)ov.remove()};
   $('grp-close').onclick=()=>ov.remove();
+
+  const grpAddInput=$('grp-add');
+  if(grpAddInput)grpAddInput.addEventListener('input',()=>{grpAddInput.value=formatPhoneInput(grpAddInput.value)});
 
   const listEl=$('grp-members-list');
   if(members){
@@ -604,13 +664,14 @@ $('group-settings-btn').onclick=async()=>{
   $('grp-save').onclick=async()=>{
     const name=$('grp-name').value.trim();
     if(!name){$('grp-err').textContent='Введите название';return}
+    if(hasBadWord(name)){$('grp-err').textContent='Название содержит запрещённые слова';return}
     await supabase.from('chats').update({name,description:$('grp-desc').value.trim()||null,is_public:$('grp-pub').checked}).eq('id',currentChatId);
     ov.remove();await loadChats();openChat(currentChatId,name,'group',chat.avatar_url||'');
   };
 
   if($('grp-add-btn'))$('grp-add-btn').onclick=async()=>{
     const p=normalizePhone($('grp-add').value.trim());
-    if(!p||p.length!==12){$('grp-err').textContent='Некорректный номер';return}
+    if(!p||!isValidRussianPhone(p)){$('grp-err').textContent='Только российский номер';return}
     const{data:u}=await supabase.from('users_public').select('phone').eq('phone',p).single();
     if(!u){$('grp-err').textContent='Пользователь не найден';return}
     const{data:ex}=await supabase.from('chat_members').select('id').eq('chat_id',currentChatId).eq('user_phone',p).limit(1);
@@ -637,13 +698,16 @@ $('new-chat-btn').onclick=()=>{
 
 function showCreateGroup(){
   const ov=document.createElement('div');ov.className='overlay';
-  ov.innerHTML=`<div class="panel"><h3>Создать группу</h3><input type="text" id="g-n" placeholder="Название" maxlength="40"><textarea id="g-d" placeholder="Описание" rows="2"></textarea><label class="check"><input type="checkbox" id="g-p"> Публичная</label><input type="text" id="g-m" placeholder="Номера через запятую"><div class="err" id="g-e"></div><button class="btn-primary" id="g-ok">Создать</button><button class="btn-secondary" id="g-c">Отмена</button></div>`;
+  ov.innerHTML=`<div class="panel"><h3>Создать группу</h3><input type="text" id="g-n" placeholder="Название" maxlength="40"><textarea id="g-d" placeholder="Описание" rows="2"></textarea><label class="check"><input type="checkbox" id="g-p"> Публичная</label><input type="text" id="g-m" placeholder="Номера через запятую (только РФ)"><div class="err" id="g-e"></div><button class="btn-primary" id="g-ok">Создать</button><button class="btn-secondary" id="g-c">Отмена</button></div>`;
   document.body.appendChild(ov);ov.onclick=e=>{if(e.target===ov)ov.remove()};
   $('g-c').onclick=()=>ov.remove();
   $('g-ok').onclick=async()=>{
     const err=$('g-e'),name=$('g-n').value.trim(),desc=$('g-d').value.trim(),pub=$('g-p').checked;
     if(!name){err.textContent='Введите название';return}
-    const phones=[...new Set($('g-m').value.split(',').map(s=>normalizePhone(s.trim())).filter(Boolean))];
+    if(hasBadWord(name)){err.textContent='Название содержит запрещённые слова';return}
+    if(desc&&hasBadWord(desc)){err.textContent='Описание содержит запрещённые слова';return}
+    const phonesRaw=$('g-m').value.split(',').map(s=>normalizePhone(s.trim())).filter(Boolean);
+    const phones=[...new Set(phonesRaw)].filter(p=>isValidRussianPhone(p));
     const{data:chat,error}=await supabase.from('chats').insert({type:'group',name,description:desc||null,is_public:pub,created_by:myPhone,status:'accepted'}).select().single();
     if(error){err.textContent=error.message;return}
     await supabase.from('chat_members').insert({chat_id:chat.id,user_phone:myPhone});
@@ -654,12 +718,14 @@ function showCreateGroup(){
 
 function showAddFriend(){
   const ov=document.createElement('div');ov.className='overlay';
-  ov.innerHTML=`<div class="panel"><h3>Добавить друга</h3><input type="tel" id="f-p" placeholder="Номер (8... или +7...)"><div class="err" id="f-e"></div><button class="btn-primary" id="f-ok">Найти</button><button class="btn-secondary" id="f-c">Отмена</button></div>`;
+  ov.innerHTML=`<div class="panel"><h3>Добавить друга</h3><input type="tel" id="f-p" placeholder="+7 XXX XXX-XX-XX" maxlength="18"><div class="err" id="f-e"></div><button class="btn-primary" id="f-ok">Найти</button><button class="btn-secondary" id="f-c">Отмена</button></div>`;
   document.body.appendChild(ov);ov.onclick=e=>{if(e.target===ov)ov.remove()};
   $('f-c').onclick=()=>ov.remove();
+  const fpi=$('f-p');
+  fpi.addEventListener('input',()=>{fpi.value=formatPhoneInput(fpi.value)});
   $('f-ok').onclick=async()=>{
-    const err=$('f-e'),p=normalizePhone($('f-p').value.trim());
-    if(!p||p.length!==12){err.textContent='Некорректный номер';return}
+    const err=$('f-e'),p=normalizePhone(fpi.value.trim());
+    if(!p||!isValidRussianPhone(p)){err.textContent='Только российский номер';return}
     if(p===myPhone){err.textContent='Это ваш номер';return}
     const{data:u}=await supabase.from('users_public').select('name').eq('phone',p).single();
     if(!u){err.textContent='Пользователь не найден';return}
@@ -735,6 +801,7 @@ $('schedule-btn').onclick=async()=>{
   $('sch-save').onclick=async()=>{
     const cid=$('sch-chat').value,type=$('sch-type').value,text=$('sch-text').value.trim();
     if(!text&&!uploadedUrl){alert('Добавь текст или фото');return}
+    if(text&&hasBadWord(text)){alert('Текст содержит запрещённые слова');return}
     await supabase.from('schedule').insert({chat_id:+cid,type,content:text||null,image_url:uploadedUrl||null,created_by:myPhone});
     ov.remove();alert('Опубликовано');
   };
