@@ -417,21 +417,45 @@ async function joinPublicChat(chat){
   $('search-input').value='';await loadChats();openChat(chat.id,chat.name||'Группа','group',chat.avatar_url||'');
 }
 
-async function findDirectChat(peerPhone){
-  const{data:my}=await supabase.from('chat_members').select('chat_id').eq('user_phone',myPhone);
-  if(!my)return null;
-  for(const m of my){const{data:ch}=await supabase.from('chats').select('id,type').eq('id',m.chat_id).single();if(ch&&ch.type==='direct'){const{data:o}=await supabase.from('chat_members').select('user_phone').eq('chat_id',m.chat_id).eq('user_phone',peerPhone).limit(1);if(o&&o.length)return ch.id}}
+ async function findDirectChat(peerPhone) {
+  const { data: my } = await supabase.from('chat_members').select('chat_id').eq('user_phone', myPhone);
+  if (!my || !my.length) return null;
+  const ids = [...new Set(my.map(m => m.chat_id))];
+  const { data: chats } = await supabase.from('chats').select('id, type, status').in('id', ids).eq('type', 'direct');
+  if (!chats) return null;
+  for (const ch of chats) {
+    const { data: o } = await supabase.from('chat_members').select('user_phone')
+      .eq('chat_id', ch.id).eq('user_phone', peerPhone).limit(1);
+    if (o && o.length) return ch.id;
+  }
   return null;
 }
 
-async function startDirect(phone){
-  const n=normalizePhone(phone);if(!n||!isValidRussianPhone(n))return;
-  if(n===myPhone)return;
-  const ex=await findDirectChat(n);if(ex){$('search-input').value='';await loadChats();return}
-  const{data:chat,error}=await supabase.from('chats').insert({type:'direct',created_by:myPhone,status:'pending'}).select().single();
-  if(error)return;
-  await supabase.from('chat_members').insert([{chat_id:chat.id,user_phone:myPhone},{chat_id:chat.id,user_phone:n}]);
-  $('search-input').value='';await loadChats();
+async function startDirect(phone) {
+  const n = normalizePhone(phone);
+  if (!n || !isValidRussianPhone(n)) return;
+  if (n === myPhone) return;
+  const ex = await findDirectChat(n);
+  if (ex) {
+    // Чат уже есть — открываем его, не создаём новый
+    const { data: chat } = await supabase.from('chats').select('*').eq('id', ex).single();
+    const { data: u } = await supabase.from('users_public').select('name, avatar_url').eq('phone', n).single();
+    const title = myLocalNames[n] || (u ? u.name : n);
+    $('search-input').value = '';
+    await loadChats();
+    openChat(ex, title, 'direct', u ? u.avatar_url : '', n, chat ? chat.status : 'accepted');
+    return;
+  }
+  // Создаём новый
+  const { data: chat, error } = await supabase.from('chats').insert({ type: 'direct', created_by: myPhone, status: 'pending' }).select().single();
+  if (error) return;
+  await supabase.from('chat_members').insert([
+    { chat_id: chat.id, user_phone: myPhone },
+    { chat_id: chat.id, user_phone: n }
+  ]);
+  $('search-input').value = '';
+  await loadChats();
+  openChat(chat.id, n, 'direct', '', n, 'pending');
 }
 
 async function openChat(chatId,title,type,avatarUrl,peerPhone,status){
