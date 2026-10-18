@@ -27,7 +27,6 @@
   @keyframes shimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
   .screen-anim{animation:screenIn .28s cubic-bezier(.21,1.02,.73,1)}
-  /* Auth */
   #auth-screen{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:30px;overflow-y:auto}
   #auth-screen .logo{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#229ed9);display:flex;align-items:center;justify-content:center;color:#fff;animation:popIn .4s}
   #auth-screen .logo .icon{width:40px;height:40px}
@@ -40,7 +39,6 @@
   .auth-form{display:flex;flex-direction:column;gap:12px;width:100%;max-width:280px}
   .auth-form button{padding:12px 40px;border:none;border-radius:24px;background:var(--accent);color:#fff;font-size:15px;font-weight:600;cursor:pointer}
   #auth-error{color:#e74c3c;font-size:13px;min-height:18px;text-align:center}
-  /* List */
   #list-screen{flex:1 1 0;min-height:0;display:flex;flex-direction:column}
   #list-header{padding:14px 18px;background:var(--bg-header);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0}
   .avatar{border-radius:50%;background:linear-gradient(135deg,var(--accent),#229ed9);display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;font-weight:600;flex-shrink:0;overflow:hidden;position:relative}
@@ -55,7 +53,7 @@
   #search-bar{padding:8px 18px;background:var(--bg-header);border-bottom:1px solid var(--border)}
   #search-bar input{width:100%;padding:9px 14px;border:none;border-radius:18px;background:var(--bg-input);color:var(--text);font-size:14px;outline:none}
   #chats{flex:1 1 0;min-height:0;overflow-y:auto}
-  .chat-item{padding:12px 18px;display:flex;align-items:center;gap:12px;cursor:pointer;border-bottom:1px solid var(--border);transition:.15s;position:relative}
+  .chat-item{padding:12px 18px;display:flex;align-items:center;gap:12px;cursor:pointer;border-bottom:1px solid var(--border);transition:.15s;position:relative;user-select:none}
   .chat-item:hover{background:var(--bg-input)}
   .chat-item .chat-avatar{width:46px;height:46px}
   .chat-item .chat-info{flex:1;min-width:0}
@@ -70,7 +68,6 @@
   .skeleton-lines{flex:1;display:flex;flex-direction:column;gap:8px}
   .skeleton-line{height:12px;border-radius:6px}
   .skeleton-line.short{width:60%}
-  /* Chat */
   #chat-screen{flex:1 1 0;min-height:0;display:flex;flex-direction:column}
   #header{padding:12px 14px;background:var(--bg-header);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-shrink:0}
   #back-btn{background:none;border:none;color:var(--text-muted);padding:6px;border-radius:50%;cursor:pointer;display:flex}
@@ -91,7 +88,6 @@
   #input{flex:1;padding:10px 16px;border:none;border-radius:20px;background:var(--bg-input);color:var(--text);font-size:14px;outline:none;min-width:0}
   #send{width:42px;height:42px;border:none;border-radius:50%;background:var(--accent);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center}
   #send:disabled{background:var(--bg-input-focus);color:var(--text-muted)}
-  /* Overlay/Panel */
   .overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;justify-content:center;align-items:center;z-index:100;animation:fadeIn .2s;padding:20px}
   .panel{background:var(--bg-card);border-radius:16px;padding:24px;width:100%;max-width:360px;color:var(--text);animation:popIn .25s;max-height:90vh;overflow-y:auto}
   .panel h3{margin-bottom:16px;font-weight:600;display:flex;align-items:center;justify-content:space-between}
@@ -116,7 +112,6 @@
   .settings-avatar-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:12px}
   .settings-avatar{width:80px;height:80px;font-size:28px;cursor:pointer}
   .search-section-title{padding:10px 18px 6px;font-size:11px;text-transform:uppercase;color:var(--text-muted);font-weight:700}
-  /* Call */
   #call-overlay{z-index:200}
   #call-overlay .panel{text-align:center}
   #call-avatar-wrap{display:flex;justify-content:center;margin-bottom:12px}
@@ -128,20 +123,18 @@
   .call-btn.decline{background:#e74c3c;color:#fff}
   .call-btn.hangup{background:#e74c3c;color:#fff}
   .call-btn .icon{width:26px;height:26px}
-  /* Schedule */
   .schedule-item{padding:10px 0;border-bottom:1px solid var(--border)}
   .schedule-item .head{display:flex;justify-content:space-between;margin-bottom:4px}
   .schedule-item .type{font-weight:600;color:var(--accent);font-size:13px}
   .schedule-item .date{font-size:10px;color:var(--text-muted)}
   .schedule-item .body{font-size:14px;white-space:pre-wrap}
   .schedule-item img{max-width:100%;border-radius:8px;margin-top:6px}
-  /* Typing */
-  #typing-indicator{padding:0 16px 4px;font-size:11px;color:var(--text-muted);height:16px;animation:pulse 1.5s infinite}
+  #typing-indicator{padding:0 16px 4px;font-size:11px;color:var(--text-muted);height:16px}
+  #request-panel{padding:16px;background:var(--bg-header);border-bottom:1px solid var(--border);text-align:center}
 </style>
 </head>
 <body>
 <div id="app">
-  <!-- AUTH -->
   <div id="auth-screen">
     <div class="logo"><svg class="icon" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></div>
     <h2>Ural Messenger</h2>
@@ -150,7 +143,6 @@
     <div class="auth-form hidden" id="form-create"><input type="text" id="create-name" placeholder="Имя" maxlength="20"><input type="tel" id="create-phone" placeholder="Номер" maxlength="20"><input type="password" id="create-password" placeholder="Пароль" maxlength="50"><button id="create-btn">Создать</button></div>
     <div id="auth-error"></div>
   </div>
-  <!-- LIST -->
   <div id="list-screen" class="hidden">
     <div id="list-header">
       <div class="avatar" id="me-avatar">?</div>
@@ -162,7 +154,6 @@
     <div id="search-bar"><input type="text" id="search-input" placeholder="Поиск групп и людей..."></div>
     <div id="chats"></div>
   </div>
-  <!-- CHAT -->
   <div id="chat-screen" class="hidden">
     <div id="header">
       <button id="back-btn"><svg class="icon" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg></button>
@@ -181,7 +172,6 @@
     </div>
   </div>
 </div>
-<!-- Call -->
 <div id="call-overlay" class="overlay hidden"><div class="panel">
   <div id="call-avatar-wrap"><div class="avatar" id="call-avatar">?</div></div>
   <h3 id="call-title">Звонок</h3>
@@ -203,7 +193,7 @@ const supabase=createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 
 const $=id=>document.getElementById(id);
 let myName='',myPhone='',myAvatar='',myLocalNames={};
-let currentChatId=null,currentChatType=null,currentChatPeer=null;
+let currentChatId=null,currentChatType=null,currentChatPeer=null,currentChatStatus=null;
 let channel=null,presenceChannel=null,isSending=false,typingTimeout=null;
 const renderedIds=new Set();
 const onlineUsers=new Set();
@@ -220,7 +210,6 @@ function escapeHtml(s){return String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'
 function initials(n){return(n||'?').trim().charAt(0).toUpperCase()||'?'}
 function avatarHtml(name,url,size){if(url)return`<div class="avatar" style="width:${size}px;height:${size}px;"><img src="${escapeHtml(url)}"></div>`;return`<div class="avatar" style="width:${size}px;height:${size}px;">${escapeHtml(initials(name))}</div>`}
 
-// ===== AUTH =====
 $('tab-login').onclick=()=>{$('tab-login').classList.add('active');$('tab-create').classList.remove('active');$('form-login').classList.remove('hidden');$('form-create').classList.add('hidden');$('auth-error').textContent=''};
 $('tab-create').onclick=()=>{$('tab-create').classList.add('active');$('tab-login').classList.remove('active');$('form-create').classList.remove('hidden');$('form-login').classList.add('hidden');$('auth-error').textContent=''};
 
@@ -271,7 +260,6 @@ async function loadLocalNames(){
   if(data)data.forEach(d=>myLocalNames[d.target_phone]=d.custom_name);
 }
 
-// ===== PRESENCE =====
 function setupPresence(){
   if(presenceChannel)supabase.removeChannel(presenceChannel);
   presenceChannel=supabase.channel('online-users',{config:{presence:{key:myPhone}}});
@@ -286,15 +274,13 @@ function setupPresence(){
 }
 
 function updateOnlineUI(){
-  // Обновляем статус в шапке чата
   if(currentChatPeer){
     const isOnline=onlineUsers.has(currentChatPeer);
     const st=$('chat-status');
-    if(st&&!st.textContent.includes('Переподключение')&&!st.textContent.includes('Загрузка')){
+    if(st&&!st.textContent.includes('Переподключение')&&!st.textContent.includes('Загрузка')&&currentChatStatus!=='pending'){
       st.innerHTML=isOnline?'<span class="online-dot"></span> онлайн':'был(а) недавно';
     }
   }
-  // Обновляем список чатов (точки онлайн)
   document.querySelectorAll('.chat-item').forEach(el=>{
     const phone=el.dataset.peerPhone;
     if(phone){
@@ -304,7 +290,6 @@ function updateOnlineUI(){
   });
 }
 
-// ===== CHATS =====
 async function loadChats(){
   $('chats').innerHTML=Array(3).fill('<div class="skeleton-item"><div class="skeleton skeleton-avatar"></div><div class="skeleton-lines"><div class="skeleton skeleton-line" style="width:70%"></div><div class="skeleton skeleton-line short"></div></div></div>').join('');
   const{data:memberships,error:mErr}=await supabase.from('chat_members').select('chat_id').eq('user_phone',myPhone);
@@ -337,11 +322,17 @@ async function loadChats(){
         <div class="chat-sub">${c.type==='group'?'Группа':'Личный чат'}${peerPhone&&onlineUsers.has(peerPhone)?' • <span class="online-dot"></span>':''}</div>
       </div>`;
     div.onclick=()=>openChat(c.id,displayName||'Чат',c.type,avatarUrl,peerPhone,c.status);
+    if(peerPhone){
+      let pressTimer;
+      const start=()=>{pressTimer=setTimeout(()=>renameChat(peerPhone),600)};
+      const cancel=()=>clearTimeout(pressTimer);
+      div.onmousedown=div.ontouchstart=start;
+      div.onmouseup=div.ontouchend=div.onmouseleave=div.ontouchcancel=cancel;
+    }
     $('chats').appendChild(div);
   }
 }
 
-// ===== SEARCH =====
 let searchTimeout=null;
 $('search-input').oninput=()=>{clearTimeout(searchTimeout);const q=$('search-input').value.trim();if(!q){loadChats();return}searchTimeout=setTimeout(()=>doSearch(q),300)};
 
@@ -380,31 +371,61 @@ async function findDirectChat(peerPhone){
 async function startDirect(phone){
   const n=normalizePhone(phone);if(n===myPhone)return;
   const ex=await findDirectChat(n);if(ex){$('search-input').value='';await loadChats();return}
-  // Создаём чат со статусом pending (запрос на переписку)
   const{data:chat,error}=await supabase.from('chats').insert({type:'direct',created_by:myPhone,status:'pending'}).select().single();
   if(error)return;
   await supabase.from('chat_members').insert([{chat_id:chat.id,user_phone:myPhone},{chat_id:chat.id,user_phone:n}]);
   $('search-input').value='';await loadChats();
 }
 
-// ===== CHAT =====
 async function openChat(chatId,title,type,avatarUrl,peerPhone,status){
-  currentChatId=chatId;currentChatType=type;currentChatPeer=peerPhone||null;
+  currentChatId=chatId;currentChatType=type;currentChatPeer=peerPhone||null;currentChatStatus=status||'accepted';
   renderedIds.clear();$('messages').innerHTML='';
+  const oldReq=$('request-panel');if(oldReq)oldReq.remove();
   $('chat-title').textContent=title;
   $('chat-avatar').outerHTML=avatarHtml(title,avatarUrl,36).replace('class="avatar"','id="chat-avatar" class="avatar"');
   $('chat-status').textContent='Загрузка...';
-  $('call-btn').classList.toggle('hidden',type!=='direct'||status==='pending');
+  const isPending=status==='pending';
+  $('call-btn').classList.toggle('hidden',type!=='direct'||isPending);
   $('group-settings-btn').classList.toggle('hidden',type!=='group');
   $('list-screen').classList.add('hidden');$('chat-screen').classList.remove('hidden');$('chat-screen').classList.add('screen-anim');
   $('input').disabled=true;$('send').disabled=true;
 
-  // История
+  // Проверяем, кто создатель
+  let isCreator=false;
+  if(isPending){
+    const{data:chatData}=await supabase.from('chats').select('created_by').eq('id',chatId).single();
+    isCreator=chatData&&chatData.created_by===myPhone;
+  }
+
+  if(isPending&&!isCreator){
+    const reqPanel=document.createElement('div');
+    reqPanel.id='request-panel';
+    reqPanel.innerHTML=`<div style="margin-bottom:10px;color:var(--text);font-size:14px;">Запрос на переписку</div>
+      <button class="btn-primary" id="accept-req" style="width:auto;padding:10px 20px;margin-right:8px;display:inline-block;">Принять</button>
+      <button class="btn-secondary" id="decline-req" style="width:auto;padding:10px 20px;display:inline-block;">Отклонить</button>`;
+    $('messages').prepend(reqPanel);
+    $('accept-req').onclick=async()=>{
+      await supabase.from('chats').update({status:'accepted'}).eq('id',chatId);
+      reqPanel.remove();
+      $('input').disabled=false;$('send').disabled=false;$('input').focus();
+      $('chat-status').textContent='Личный чат';
+      currentChatStatus='accepted';
+      $('call-btn').classList.remove('hidden');
+      loadChats();
+    };
+    $('decline-req').onclick=async()=>{
+      await supabase.from('chat_members').delete().eq('chat_id',chatId).eq('user_phone',myPhone);
+      $('back-btn').click();
+    };
+  } else if(isPending&&isCreator){
+    $('chat-status').textContent='Ожидание подтверждения';
+    $('input').placeholder='Ждём, пока собеседник примет запрос...';
+  }
+
   const{data:history,error}=await supabase.from('messages').select('*').eq('chat_id',chatId).order('created_at',{ascending:true}).limit(100);
   if(error)$('chat-status').textContent='История: '+error.message;
   else if(history)history.forEach(m=>{if(!renderedIds.has(m.id)){renderedIds.add(m.id);addMessage(m.user_name,m.text,m.user_name===myName,m.created_at,m.image_url)}});
 
-  // Realtime сообщения
   if(channel)supabase.removeChannel(channel);
   channel=supabase.channel('msg-'+chatId)
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:`chat_id=eq.${chatId}`},payload=>{
@@ -421,15 +442,15 @@ async function openChat(chatId,title,type,avatarUrl,peerPhone,status){
     })
     .subscribe(st=>{
       if(st==='SUBSCRIBED'){
-        $('chat-status').innerHTML=onlineUsers.has(peerPhone)?'<span class="online-dot"></span> онлайн':(type==='group'?'Группа':'Личный чат');
-        if(status!=='pending'){$('input').disabled=false;$('send').disabled=false;$('input').focus()}
-        else{$('input').placeholder='Запрос на переписку отправлен';}
+        if(!isPending){
+          $('chat-status').innerHTML=onlineUsers.has(peerPhone)?'<span class="online-dot"></span> онлайн':(type==='group'?'Группа':'Личный чат');
+          $('input').disabled=false;$('send').disabled=false;$('input').focus();
+        }
       }
     });
 
-  // Отправка "печатает"
   $('input').oninput=()=>{
-    if(!channel||status==='pending')return;
+    if(!channel||isPending)return;
     channel.send({type:'broadcast',event:'typing',payload:{from:myName,chatId}});
   };
 
@@ -444,7 +465,7 @@ async function openChat(chatId,title,type,avatarUrl,peerPhone,status){
 
 $('back-btn').onclick=()=>{
   if(channel){supabase.removeChannel(channel);channel=null}
-  currentChatId=null;currentChatPeer=null;
+  currentChatId=null;currentChatPeer=null;currentChatStatus=null;
   $('chat-screen').classList.add('hidden');$('list-screen').classList.remove('hidden');$('list-screen').classList.add('screen-anim');
   loadChats();
 };
@@ -452,6 +473,9 @@ $('back-btn').onclick=()=>{
 async function sendMessage(){
   const text=$('input').value.trim();
   if(!text||isSending||!currentChatId)return;
+  // Проверка статуса
+  const{data:cd}=await supabase.from('chats').select('status').eq('id',currentChatId).single();
+  if(cd&&cd.status==='pending'){$('chat-status').textContent='Чат не подтверждён';return}
   isSending=true;$('send').disabled=true;$('input').value='';
   const{error}=await supabase.from('messages').insert({user_name:myName,text,image_url:null,chat_id:currentChatId});
   if(error){$('chat-status').textContent='Ошибка: '+error.message;$('input').value=text}
@@ -478,12 +502,45 @@ function addMessage(name,text,isSelf,createdAt,imageUrl){
   const div=document.createElement('div');
   div.className='msg '+(isSelf?'self':'other');
   const time=createdAt?new Date(createdAt).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'}):'';
-  const nameHtml=!isSelf?`<div class="name">${escapeHtml(myLocalNames[name]||name)}</div>`:'';
+  const displayName=myLocalNames[name]||name;
+  const nameHtml=!isSelf?`<div class="name">${escapeHtml(displayName)}</div>`:'';
   div.innerHTML=`${nameHtml}${text?escapeHtml(text):''}${imageUrl?`<img src="${escapeHtml(imageUrl)}" loading="lazy">`:''}<span class="time">${time}</span>`;
   $('messages').appendChild(div);$('messages').scrollTop=$('messages').scrollHeight;
 }
 
-// ===== GROUP SETTINGS =====
+async function renameChat(peerPhone){
+  const{data:u}=await supabase.from('users_public').select('name').eq('phone',peerPhone).single();
+  const originalName=u?u.name:peerPhone;
+  const current=myLocalNames[peerPhone]||'';
+  const ov=document.createElement('div');ov.className='overlay';
+  ov.innerHTML=`<div class="panel">
+    <h3>Переименовать</h3>
+    <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">Оригинал: ${escapeHtml(originalName)}</div>
+    <input type="text" id="rn-input" placeholder="Новое имя (только для вас)" value="${escapeHtml(current)}">
+    <div class="err" id="rn-err"></div>
+    <button class="btn-primary" id="rn-save">Сохранить</button>
+    <button class="btn-secondary" id="rn-reset">Сбросить</button>
+    <button class="btn-secondary" id="rn-cancel">Отмена</button>
+  </div>`;
+  document.body.appendChild(ov);
+  ov.onclick=e=>{if(e.target===ov)ov.remove()};
+  $('rn-cancel').onclick=()=>ov.remove();
+  $('rn-save').onclick=async()=>{
+    const name=$('rn-input').value.trim();
+    if(!name){$('rn-err').textContent='Введите имя';return}
+    const{data:existing}=await supabase.from('local_names').select('id').eq('owner_phone',myPhone).eq('target_phone',peerPhone).limit(1);
+    if(existing&&existing.length)await supabase.from('local_names').update({custom_name:name}).eq('id',existing[0].id);
+    else await supabase.from('local_names').insert({owner_phone:myPhone,target_phone:peerPhone,custom_name:name});
+    myLocalNames[peerPhone]=name;
+    ov.remove();await loadChats();
+  };
+  $('rn-reset').onclick=async()=>{
+    await supabase.from('local_names').delete().eq('owner_phone',myPhone).eq('target_phone',peerPhone);
+    delete myLocalNames[peerPhone];
+    ov.remove();await loadChats();
+  };
+}
+
 $('group-settings-btn').onclick=async()=>{
   if(!currentChatId||currentChatType!=='group')return;
   const{data:chat}=await supabase.from('chats').select('*').eq('id',currentChatId).single();
@@ -513,7 +570,6 @@ $('group-settings-btn').onclick=async()=>{
   ov.onclick=e=>{if(e.target===ov)ov.remove()};
   $('grp-close').onclick=()=>ov.remove();
 
-  // Список участников с киком
   const listEl=$('grp-members-list');
   if(members){
     for(const m of members){
@@ -530,7 +586,6 @@ $('group-settings-btn').onclick=async()=>{
     });
   }
 
-  // Аватар
   const fi=$('grp-av-file');
   $('grp-av-btn').onclick=()=>fi.click();
   $('grp-av').onclick=()=>fi.click();
@@ -546,7 +601,6 @@ $('group-settings-btn').onclick=async()=>{
     ov.remove();$('group-settings-btn').click();
   };
 
-  // Сохранение
   $('grp-save').onclick=async()=>{
     const name=$('grp-name').value.trim();
     if(!name){$('grp-err').textContent='Введите название';return}
@@ -554,7 +608,6 @@ $('group-settings-btn').onclick=async()=>{
     ov.remove();await loadChats();openChat(currentChatId,name,'group',chat.avatar_url||'');
   };
 
-  // Добавление
   if($('grp-add-btn'))$('grp-add-btn').onclick=async()=>{
     const p=normalizePhone($('grp-add').value.trim());
     if(!p||p.length!==12){$('grp-err').textContent='Некорректный номер';return}
@@ -566,7 +619,6 @@ $('group-settings-btn').onclick=async()=>{
     ov.remove();$('group-settings-btn').click();
   };
 
-  // Выход
   $('grp-leave').onclick=async()=>{
     if(!confirm('Выйти из группы?'))return;
     await supabase.from('chat_members').delete().eq('chat_id',currentChatId).eq('user_phone',myPhone);
@@ -574,7 +626,6 @@ $('group-settings-btn').onclick=async()=>{
   };
 };
 
-// ===== MODALS =====
 $('new-chat-btn').onclick=()=>{
   const ov=document.createElement('div');ov.className='overlay';
   ov.innerHTML=`<div class="panel"><h3>Новый чат</h3><div class="menu-list"><div class="menu-item" id="m-g">Создать группу</div><div class="menu-item" id="m-f">Добавить друга</div></div><button class="btn-secondary" id="m-c" style="margin-top:16px;">Отмена</button></div>`;
@@ -616,7 +667,6 @@ function showAddFriend(){
   };
 }
 
-// ===== SETTINGS =====
 $('settings-btn').onclick=()=>{
   const THEMES=[{id:'dark',bg:'#17212b',accent:'#2aabee'},{id:'light',bg:'#fff',accent:'#2aabee'},{id:'dark-blue',bg:'#0f1b2b',accent:'#2aabee'},{id:'dark-purple',bg:'#1a1426',accent:'#9b59b6'},{id:'dark-green',bg:'#0f1f18',accent:'#2ecc71'}];
   const ov=document.createElement('div');ov.className='overlay';
@@ -650,7 +700,6 @@ $('settings-btn').onclick=()=>{
   };
 };
 
-// ===== SCHEDULE =====
 $('schedule-btn').onclick=async()=>{
   const{data:ms}=await supabase.from('chat_members').select('chat_id').eq('user_phone',myPhone);
   if(!ms||!ms.length){alert('Нет чатов');return}
@@ -700,7 +749,6 @@ $('schedule-btn').onclick=async()=>{
   };
 };
 
-// ===== CALLS =====
 let callChannel=null,pc=null,localStream=null,callTimerInterval=null,callStartTime=null,isCallActive=false;
 const callOverlay=$('call-overlay'),remoteAudio=$('remote-audio');
 const ICE={iceServers:[
