@@ -199,14 +199,12 @@ let channel=null,presenceChannel=null,isSending=false,typingTimeout=null;
 const renderedIds=new Set();
 const onlineUsers=new Set();
 
-// Матерные корни (русские + английские)
-const BAD_WORDS=['бля','бляд','блят','хуй','хуя','хуе','хуи','пизд','пизж','еба','ебал','ебан','ебан','ебуч','ебет','ебет','ебись','ебет','сук','сука','суки','суч','муд','муда','муди','пидор','пидар','педик','гандон','ганд','залуп','долбо','долба','хер','херн','хрен','гнид','мраз','тварь','шалав','шлюх','говн','дерьм','жоп','жоп','срак','срал','срат','перд','fuck','fuk','shit','bitch','dick','pussy','cunt','asshole','bastard','whore','slut'];
+const BAD_WORDS=['бля','бляд','блят','хуй','хуя','хуе','хуи','пизд','пизж','еба','ебал','ебан','ебуч','ебет','ебись','сук','сука','суки','суч','муд','муда','муди','пидор','пидар','педик','гандон','залуп','долбо','долба','хер','херн','хрен','гнид','мраз','тварь','шалав','шлюх','говн','дерьм','жоп','срак','срал','срат','перд','fuck','fuk','shit','bitch','dick','pussy','cunt','asshole','bastard','whore','slut'];
 function hasBadWord(text){
   const lower=String(text).toLowerCase().replace(/[^а-яёa-z0-9]/g,'');
   return BAD_WORDS.some(w=>lower.includes(w));
 }
 
-// Валидация РФ номера: на входе 8XXXXXXXXXX или +7XXXXXXXXXX или 7XXXXXXXXXX (11 цифр)
 function normalizePhone(p){
   let d=String(p).replace(/[^0-9]/g,'');
   if(d.length===11&&d.startsWith('8'))d='7'+d.slice(1);
@@ -218,7 +216,6 @@ function isValidRussianPhone(p){
   const n=normalizePhone(p);
   return n && /^\+7\d{10}$/.test(n);
 }
-// Форматирование для input
 function formatPhoneInput(v){
   let d=String(v).replace(/[^0-9]/g,'');
   if(d.startsWith('8'))d='7'+d.slice(1);
@@ -243,7 +240,6 @@ function applyTheme(){document.documentElement.setAttribute('data-theme',setting
 let audioCtx=null;
 function playPing(){if(!settings.sound)return;try{if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='sine';o.frequency.setValueAtTime(880,audioCtx.currentTime);o.frequency.exponentialRampToValueAtTime(660,audioCtx.currentTime+.15);g.gain.setValueAtTime(.0001,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.15,audioCtx.currentTime+.01);g.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+.3);o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+.3)}catch(e){}}
 
-// ===== Автоформат телефона в полях =====
 ['login-phone','create-phone'].forEach(id=>{
   const el=$(id);
   if(!el)return;
@@ -257,7 +253,6 @@ function playPing(){if(!settings.sound)return;try{if(!audioCtx)audioCtx=new(wind
   });
 });
 
-// ===== AUTH =====
 $('tab-login').onclick=()=>{$('tab-login').classList.add('active');$('tab-create').classList.remove('active');$('form-login').classList.remove('hidden');$('form-create').classList.add('hidden');$('auth-error').textContent=''};
 $('tab-create').onclick=()=>{$('tab-create').classList.add('active');$('tab-login').classList.remove('active');$('form-create').classList.remove('hidden');$('form-login').classList.add('hidden');$('auth-error').textContent=''};
 
@@ -305,6 +300,7 @@ async function enterApp(){
   setupGlobalCallListener();
   setupPresence();
   await loadChats();
+  addAdminButton();
 }
 
 function updateMeHeader(){
@@ -418,45 +414,42 @@ async function joinPublicChat(chat){
   $('search-input').value='';await loadChats();openChat(chat.id,chat.name||'Группа','group',chat.avatar_url||'');
 }
 
- async function findDirectChat(peerPhone) {
-  const { data: my } = await supabase.from('chat_members').select('chat_id').eq('user_phone', myPhone);
-  if (!my || !my.length) return null;
-  const ids = [...new Set(my.map(m => m.chat_id))];
-  const { data: chats } = await supabase.from('chats').select('id, type, status').in('id', ids).eq('type', 'direct');
-  if (!chats) return null;
-  for (const ch of chats) {
-    const { data: o } = await supabase.from('chat_members').select('user_phone')
-      .eq('chat_id', ch.id).eq('user_phone', peerPhone).limit(1);
-    if (o && o.length) return ch.id;
+async function findDirectChat(peerPhone){
+  const{data:my}=await supabase.from('chat_members').select('chat_id').eq('user_phone',myPhone);
+  if(!my||!my.length)return null;
+  const ids=[...new Set(my.map(m=>m.chat_id))];
+  const{data:chats}=await supabase.from('chats').select('id,type,status').in('id',ids).eq('type','direct');
+  if(!chats)return null;
+  for(const ch of chats){
+    const{data:o}=await supabase.from('chat_members').select('user_phone').eq('chat_id',ch.id).eq('user_phone',peerPhone).limit(1);
+    if(o&&o.length)return ch.id;
   }
   return null;
 }
 
-async function startDirect(phone) {
-  const n = normalizePhone(phone);
-  if (!n || !isValidRussianPhone(n)) return;
-  if (n === myPhone) return;
-  const ex = await findDirectChat(n);
-  if (ex) {
-    // Чат уже есть — открываем его, не создаём новый
-    const { data: chat } = await supabase.from('chats').select('*').eq('id', ex).single();
-    const { data: u } = await supabase.from('users_public').select('name, avatar_url').eq('phone', n).single();
-    const title = myLocalNames[n] || (u ? u.name : n);
-    $('search-input').value = '';
+async function startDirect(phone){
+  const n=normalizePhone(phone);
+  if(!n||!isValidRussianPhone(n))return;
+  if(n===myPhone)return;
+  const ex=await findDirectChat(n);
+  if(ex){
+    const{data:chat}=await supabase.from('chats').select('*').eq('id',ex).single();
+    const{data:u}=await supabase.from('users_public').select('name,avatar_url').eq('phone',n).single();
+    const title=myLocalNames[n]||(u?u.name:n);
+    $('search-input').value='';
     await loadChats();
-    openChat(ex, title, 'direct', u ? u.avatar_url : '', n, chat ? chat.status : 'accepted');
+    openChat(ex,title,'direct',u?u.avatar_url:'',n,chat?chat.status:'accepted');
     return;
   }
-  // Создаём новый
-  const { data: chat, error } = await supabase.from('chats').insert({ type: 'direct', created_by: myPhone, status: 'pending' }).select().single();
-  if (error) return;
+  const{data:chat,error}=await supabase.from('chats').insert({type:'direct',created_by:myPhone,status:'pending'}).select().single();
+  if(error)return;
   await supabase.from('chat_members').insert([
-    { chat_id: chat.id, user_phone: myPhone },
-    { chat_id: chat.id, user_phone: n }
+    {chat_id:chat.id,user_phone:myPhone},
+    {chat_id:chat.id,user_phone:n}
   ]);
-  $('search-input').value = '';
+  $('search-input').value='';
   await loadChats();
-  openChat(chat.id, n, 'direct', '', n, 'pending');
+  openChat(chat.id,n,'direct','',n,'pending');
 }
 
 async function openChat(chatId,title,type,avatarUrl,peerPhone,status){
@@ -930,55 +923,82 @@ $('call-accept').onclick=async()=>{
 };
 $('call-decline').onclick=()=>{if(callChannel)callChannel.send({type:'broadcast',event:'decline',payload:{}});cleanupCall()};
 $('call-hangup').onclick=()=>{if(callChannel)callChannel.send({type:'broadcast',event:'hangup',payload:{}});cleanupCall()};
-if('serviceWorker'in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('/Ural-Messenger/sw.js',{scope:'/Ural-Messenger/'}).catch(()=>{})})}
 
-// ===== АДМИН-КОНСОЛЬ (ПАСХАЛКА) =====
-const ADMIN_PHONE = '+79089081190'; // ТВОЙ номер
-const SECRET_WORD = 'uraladmin';
+// ===== УСТАНОВКА PWA =====
+const installBtn=document.getElementById('install-btn');
+let deferredPrompt=null;
+function isAppInstalled(){
+  if(window.matchMedia('(display-mode: standalone)').matches)return true;
+  if(window.navigator.standalone===true)return true;
+  if(document.referrer.includes('android-app://'))return true;
+  return false;
+}
+function hideInstallButton(){
+  if(installBtn){installBtn.classList.add('hidden');installBtn.remove();}
+  localStorage.setItem('pwa_installed','true');
+}
+if(isAppInstalled()||localStorage.getItem('pwa_installed')==='true')hideInstallButton();
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();deferredPrompt=e;
+  if(!isAppInstalled()&&localStorage.getItem('pwa_installed')!=='true'){
+    if(installBtn)installBtn.classList.remove('hidden');
+  }
+});
+if(installBtn){
+  installBtn.onclick=async()=>{
+    if(!deferredPrompt)return;
+    deferredPrompt.prompt();
+    const result=await deferredPrompt.userChoice;
+    if(result.outcome==='accepted'){/* скроется в appinstalled */}
+    deferredPrompt=null;
+  };
+}
+window.addEventListener('appinstalled',()=>{hideInstallButton();deferredPrompt=null;});
+if(isAppInstalled()){localStorage.setItem('pwa_installed','true');hideInstallButton();}
 
-const searchEl = document.getElementById('search-input');
-if (searchEl) {
-  searchEl.addEventListener('input', (e) => {
-    if (e.target.value.trim().toLowerCase() === SECRET_WORD) {
-      e.target.value = '';
-      openAdminConsole();
-    }
+// ===== АВТООБНОВЛЕНИЕ SW =====
+if('serviceWorker'in navigator){
+  let refreshing=false;
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{
+    if(refreshing)return;refreshing=true;window.location.reload();
   });
-  searchEl.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && e.target.value.trim().toLowerCase() === SECRET_WORD) {
-      e.preventDefault();
-      e.target.value = '';
-      openAdminConsole();
-    }
+  setInterval(()=>{navigator.serviceWorker.getRegistration().then(reg=>reg&&reg.update());},5*60*1000);
+  document.addEventListener('visibilitychange',()=>{
+    if(!document.hidden)navigator.serviceWorker.getRegistration().then(reg=>reg&&reg.update());
+  });
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('/Ural-Messenger/sw.js',{scope:'/Ural-Messenger/'}).catch(()=>{});
   });
 }
 
-function addAdminButton() {
-  if (myPhone !== ADMIN_PHONE) return;
-  if (document.getElementById('admin-btn')) return;
-  const header = document.getElementById('list-header');
-  if (!header) return;
-  const btn = document.createElement('button');
-  btn.id = 'admin-btn';
-  btn.className = 'icon-btn';
-  btn.title = 'Админ';
-  btn.innerHTML = '<svg class="icon" viewBox="0 0 24 24"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>';
-  btn.style.color = '#f39c12';
-  btn.onclick = openAdminConsole;
-  header.insertBefore(btn, header.querySelector('#settings-btn') || header.lastElementChild);
+// ===== АДМИН-КОНСОЛЬ =====
+const ADMIN_PHONE='+79089081190';
+const SECRET_WORD='uraladmin';
+const searchEl=document.getElementById('search-input');
+if(searchEl){
+  searchEl.addEventListener('input',e=>{
+    if(e.target.value.trim().toLowerCase()===SECRET_WORD){e.target.value='';openAdminConsole();}
+  });
+  searchEl.addEventListener('keydown',e=>{
+    if(e.key==='Enter'&&e.target.value.trim().toLowerCase()===SECRET_WORD){e.preventDefault();e.target.value='';openAdminConsole();}
+  });
 }
-
-const _origEnterApp = enterApp;
-enterApp = async function() {
-  await _origEnterApp();
-  addAdminButton();
-};
-
-async function openAdminConsole() {
-  if (myPhone !== ADMIN_PHONE) return;
-  const ov = document.createElement('div');
-  ov.className = 'overlay';
-  ov.innerHTML = `<div class="panel" style="max-height:85vh;overflow-y:auto;">
+function addAdminButton(){
+  if(myPhone!==ADMIN_PHONE)return;
+  if(document.getElementById('admin-btn'))return;
+  const header=document.getElementById('list-header');
+  if(!header)return;
+  const btn=document.createElement('button');
+  btn.id='admin-btn';btn.className='icon-btn';btn.title='Админ';
+  btn.innerHTML='<svg class="icon" viewBox="0 0 24 24"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>';
+  btn.style.color='#f39c12';
+  btn.onclick=openAdminConsole;
+  header.insertBefore(btn,header.querySelector('#settings-btn')||header.lastElementChild);
+}
+async function openAdminConsole(){
+  if(myPhone!==ADMIN_PHONE)return;
+  const ov=document.createElement('div');ov.className='overlay';
+  ov.innerHTML=`<div class="panel" style="max-height:85vh;overflow-y:auto;">
     <h3>🛠 Админ-консоль</h3>
     <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">Всего пользователей: <span id="adm-count">...</span></div>
     <div id="adm-list" style="max-height:400px;overflow-y:auto;"></div>
@@ -986,150 +1006,44 @@ async function openAdminConsole() {
     <button class="btn-secondary" id="adm-close">Закрыть</button>
   </div>`;
   document.body.appendChild(ov);
-  ov.onclick = e => { if (e.target === ov) ov.remove(); };
-  document.getElementById('adm-close').onclick = () => ov.remove();
-
-  const { data: users } = await supabase.from('users_public').select('name, phone, avatar_url');
-  document.getElementById('adm-count').textContent = users ? users.length : 0;
-  const list = document.getElementById('adm-list');
-  list.innerHTML = '';
-  if (users) {
-    users.forEach(u => {
-      const div = document.createElement('div');
-      div.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;';
-      div.innerHTML = `<span>${escapeHtml(u.name)} <small style="color:var(--text-muted)">${escapeHtml(u.phone)}</small></span>
-        ${u.phone !== ADMIN_PHONE ? `<button style="background:none;border:none;color:#e74c3c;cursor:pointer;font-size:16px;" data-del="${u.phone}">✕</button>` : '<span style="color:var(--online);font-size:11px;">вы</span>'}`;
+  ov.onclick=e=>{if(e.target===ov)ov.remove()};
+  document.getElementById('adm-close').onclick=()=>ov.remove();
+  const{data:users}=await supabase.from('users_public').select('name,phone,avatar_url');
+  document.getElementById('adm-count').textContent=users?users.length:0;
+  const list=document.getElementById('adm-list');list.innerHTML='';
+  if(users){
+    users.forEach(u=>{
+      const div=document.createElement('div');
+      div.style.cssText='display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;';
+      div.innerHTML=`<span>${escapeHtml(u.name)} <small style="color:var(--text-muted)">${escapeHtml(u.phone)}</small></span>${u.phone!==ADMIN_PHONE?`<button style="background:none;border:none;color:#e74c3c;cursor:pointer;font-size:16px;" data-del="${u.phone}">✕</button>`:'<span style="color:var(--online);font-size:11px;">вы</span>'}`;
       list.appendChild(div);
     });
-    list.querySelectorAll('[data-del]').forEach(b => b.onclick = async () => {
-      if (!confirm('Удалить пользователя ' + b.dataset.del + '?')) return;
-      await supabase.from('chat_members').delete().eq('user_phone', b.dataset.del);
-      await supabase.from('local_names').delete().eq('owner_phone', b.dataset.del);
-      await supabase.from('local_names').delete().eq('target_phone', b.dataset.del);
-      await supabase.from('messages').delete().eq('user_name', b.dataset.del);
-      await supabase.from('users').delete().eq('phone', b.dataset.del);
-      ov.remove();
-      openAdminConsole();
+    list.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{
+      if(!confirm('Удалить пользователя '+b.dataset.del+'?'))return;
+      await supabase.from('chat_members').delete().eq('user_phone',b.dataset.del);
+      await supabase.from('local_names').delete().eq('owner_phone',b.dataset.del);
+      await supabase.from('local_names').delete().eq('target_phone',b.dataset.del);
+      await supabase.from('messages').delete().eq('user_name',b.dataset.del);
+      await supabase.from('users').delete().eq('phone',b.dataset.del);
+      ov.remove();openAdminConsole();
     });
   }
-
-  document.getElementById('adm-clean').onclick = async () => {
-    if (!confirm('Удалить ВСЕХ пользователей, кроме вас? Это необратимо!')) return;
-    if (!confirm('Точно? Все чаты и сообщения тоже удалятся.')) return;
-    const { data: allUsers } = await supabase.from('users_public').select('phone');
-    if (allUsers) {
-      for (const u of allUsers) {
-        if (u.phone === ADMIN_PHONE) continue;
-        await supabase.from('chat_members').delete().eq('user_phone', u.phone);
-        await supabase.from('local_names').delete().eq('owner_phone', u.phone);
-        await supabase.from('local_names').delete().eq('target_phone', u.phone);
-        await supabase.from('users').delete().eq('phone', u.phone);
+  document.getElementById('adm-clean').onclick=async()=>{
+    if(!confirm('Удалить ВСЕХ пользователей, кроме вас? Это необратимо!'))return;
+    if(!confirm('Точно? Все чаты и сообщения тоже удалятся.'))return;
+    const{data:allUsers}=await supabase.from('users_public').select('phone');
+    if(allUsers){
+      for(const u of allUsers){
+        if(u.phone===ADMIN_PHONE)continue;
+        await supabase.from('chat_members').delete().eq('user_phone',u.phone);
+        await supabase.from('local_names').delete().eq('owner_phone',u.phone);
+        await supabase.from('local_names').delete().eq('target_phone',u.phone);
+        await supabase.from('users').delete().eq('phone',u.phone);
       }
     }
-    await supabase.from('chats').delete().eq('type', 'direct');
-    ov.remove();
-    alert('Готово');
-    location.reload();
+    await supabase.from('chats').delete().eq('type','direct');
+    ov.remove();alert('Готово');location.reload();
   };
-}
-// ===== КОНЕЦ АДМИН-КОНСОЛИ =====
-  // ===== УСТАНОВКА PWA (УМНАЯ) =====
-const installBtn = document.getElementById('install-btn');
-let deferredPrompt = null;
-
-// Проверка: приложение уже установлено и запущено как PWA?
-function isAppInstalled() {
-  // Android/Chrome: display-mode: standalone
-  if (window.matchMedia('(display-mode: standalone)').matches) return true;
-  // iOS Safari: navigator.standalone
-  if (window.navigator.standalone === true) return true;
-  // Android: referrer от android-app
-  if (document.referrer.includes('android-app://')) return true;
-  return false;
-}
-
-// Скрыть кнопку навсегда, если уже установлено
-function hideInstallButton() {
-  if (installBtn) {
-    installBtn.classList.add('hidden');
-    installBtn.remove(); // убираем из DOM, чтобы остальные кнопки встали на место
-  }
-  localStorage.setItem('pwa_installed', 'true');
-}
-
-// При загрузке: если уже установлено — прячем
-if (isAppInstalled() || localStorage.getItem('pwa_installed') === 'true') {
-  hideInstallButton();
-}
-
-// Событие: браузер говорит, что можно установить
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  // Показываем кнопку только если ещё не установлено
-  if (!isAppInstalled() && localStorage.getItem('pwa_installed') !== 'true') {
-    if (installBtn) installBtn.classList.remove('hidden');
-  }
-});
-
-// Клик по кнопке
-if (installBtn) {
-  installBtn.onclick = async () => {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    const result = await deferredPrompt.userChoice;
-    if (result.outcome === 'accepted') {
-      // Пользователь согласился — ждём установки
-      // Кнопка скроется в appinstalled
-    } else {
-      // Отказался — оставляем кнопку
-    }
-    deferredPrompt = null;
-  };
-}
-
-// Событие: приложение реально установлено
-window.addEventListener('appinstalled', () => {
-  hideInstallButton();
-  deferredPrompt = null;
-});
-
-// Дополнительно: если приложение запущено как PWA, но localStorage пуст —
-// прячем кнопку и ставим флаг
-if (isAppInstalled()) {
-  localStorage.setItem('pwa_installed', 'true');
-  hideInstallButton();
-}
-
-// Автообновление при выходе новой версии SW
-if ('serviceWorker' in navigator) {
-  let refreshing = false;
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (refreshing) return;
-    refreshing = true;
-    window.location.reload();
-  });
-
-  setInterval(() => {
-    navigator.serviceWorker.getRegistration().then(reg => reg && reg.update());
-  }, 5 * 60 * 1000);
-
-  document.addEventListener('visibilitychange', () => {
-    if (!document.hidden) {
-      navigator.serviceWorker.getRegistration().then(reg => reg && reg.update());
-    }
-  });
-}
-  // Проверяем обновления каждые 5 минут (или при возврате на вкладку)
-  setInterval(() => {
-    navigator.serviceWorker.getRegistration().then(reg => reg && reg.update());
-  }, 5 * 60 * 1000);
-  
-  document.addEventListener('visibilitychange', () => {
-    if (!document.hidden) {
-      navigator.serviceWorker.getRegistration().then(reg => reg && reg.update());
-    }
-  });
 }
 </script>
 </body>
