@@ -1,123 +1,180 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мой Мессенджер</title>
-    <!-- Подключаем Supabase JS -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        /* Базовые стили в стиле Telegram (сине-белая тема) */
-        body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #e6ebee; height: 100vh; display: flex; justify-content: center; align-items: center; }
-        .app { width: 100%; max-width: 400px; height: 90vh; background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden; }
-        .header { background: #517da2; color: white; padding: 15px; font-weight: bold; text-align: center; }
-        .chat-box { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: #e6ebee; }
-        .message { max-width: 80%; padding: 8px 12px; border-radius: 12px; background: white; align-self: flex-start; box-shadow: 0 1px 2px rgba(0,0,0,0.1); font-size: 14px; word-break: break-word; }
-        .message.my { background: #effdde; align-self: flex-end; }
-        .message .user { font-size: 10px; color: #517da2; font-weight: bold; margin-bottom: 4px; }
-        .input-area { display: flex; padding: 10px; background: white; border-top: 1px solid #ddd; }
-        input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 20px; outline: none; font-size: 14px; }
-        button { background: #517da2; color: white; border: none; padding: 10px 20px; margin-left: 10px; border-radius: 20px; cursor: pointer; font-weight: bold; }
-        button:hover { background: #3e6282; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ural Messenger</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+  .app {
+    width: 100%; max-width: 420px; height: 92vh; background: #fff;
+    border-radius: 16px; overflow: hidden; display: flex; flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+  .header {
+    background: #517da2; color: #fff; padding: 16px; font-weight: 600;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .status { font-size: 11px; opacity: 0.8; display: flex; align-items: center; gap: 6px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #4caf50; transition: background .3s; }
+  .dot.offline { background: #f44336; }
+  .chat-box {
+    flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column;
+    gap: 8px; background: #e6ebee;
+  }
+  .message {
+    max-width: 80%; padding: 8px 12px; border-radius: 12px; background: #fff;
+    align-self: flex-start; box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    font-size: 14px; word-break: break-word; animation: pop .2s ease-out;
+  }
+  @keyframes pop { from { opacity: 0; transform: translateY(8px) scale(.97); } to { opacity: 1; transform: none; } }
+  .message.my { background: #effdde; align-self: flex-end; }
+  .message .user { font-size: 11px; color: #517da2; font-weight: 600; margin-bottom: 3px; }
+  .message .time { font-size: 10px; color: #999; text-align: right; margin-top: 3px; }
+  .input-area { display: flex; padding: 10px; background: #fff; border-top: 1px solid #eee; gap: 8px; }
+  input {
+    flex: 1; padding: 11px 16px; border: 1px solid #ddd; border-radius: 22px;
+    outline: none; font-size: 14px; transition: border-color .2s;
+  }
+  input:focus { border-color: #517da2; }
+  button {
+    background: #517da2; color: #fff; border: none; padding: 0 20px;
+    border-radius: 22px; cursor: pointer; font-weight: 600; transition: background .2s;
+  }
+  button:hover { background: #3e6282; }
+  button:disabled { background: #b0bec5; cursor: not-allowed; }
+</style>
 </head>
 <body>
-    <div class="app">
-        <div class="header">Общий чат</div>
-        <div class="chat-box" id="messages-container"></div>
-        <div class="input-area">
-            <input type="text" id="message-input" placeholder="Написать сообщение..." autocomplete="off">
-            <button id="send-btn">Отпр.</button>
-        </div>
+  <div class="app">
+    <div class="header">
+      <span>Ural Messenger</span>
+      <div class="status"><span class="dot" id="dot"></span><span id="status-text">Подключение...</span></div>
     </div>
+    <div class="chat-box" id="messages-container"></div>
+    <div class="input-area">
+      <input type="text" id="message-input" placeholder="Написать сообщение..." autocomplete="off" maxlength="1000">
+      <button id="send-btn">Отпр.</button>
+    </div>
+  </div>
 
-    <script>
-        // --- 1. НАСТРОЙКА ---
-        const SUPABASE_URL = 'ВСТАВЬ_СЮДА_СВОЙ_URL';
-        const SUPABASE_ANON_KEY = 'ВСТАВЬ_СЮДА_СВОЙ_ANON_KEY';
-        
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+<script>
+  // --- НАСТРОЙКИ ---
+  const SUPABASE_URL = 'https://mlmydwdpffkvopnephxb.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_SkBC73epMoENvYFRXvhLHQ_BBh3wIJ8';
 
-        // Для простоты имя пользователя спрашивается один раз при входе
-        let username = prompt("Введи свое имя:", "Гость");
-        if (!username) username = "Гость";
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        const container = document.getElementById('messages-container');
-        const input = document.getElementById('message-input');
-        const btn = document.getElementById('send-btn');
+  let username = prompt("Введи свое имя:", "") || "Гость";
+  username = username.trim().slice(0, 30) || "Гость";
 
-        // --- 2. ЗАГРУЗКА СТАРЫХ СООБЩЕНИЙ ---
-        async function loadMessages() {
-            const { data, error } = await supabase
-                .from('messages')
-                .select('*')
-                .order('created_at', { ascending: true })
-                .limit(50);
-            
-            if (error) { console.error(error); return; }
-            container.innerHTML = '';
-            data.forEach(msg => addMessageToUI(msg));
-            scrollToBottom();
+  const container = document.getElementById('messages-container');
+  const input = document.getElementById('message-input');
+  const btn = document.getElementById('send-btn');
+  const dot = document.getElementById('dot');
+  const statusText = document.getElementById('status-text');
+
+  // --- УТИЛИТЫ ---
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+  function formatTime(iso) {
+    const d = new Date(iso);
+    return d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+  }
+  function scrollToBottom() {
+    container.scrollTop = container.scrollHeight;
+  }
+
+  // --- ДОБАВЛЕНИЕ НА ЭКРАН ---
+  function addMessageToUI(msg) {
+    const div = document.createElement('div');
+    div.classList.add('message');
+    if (msg.username === username) div.classList.add('my');
+    div.innerHTML = `
+      <div class="user">${escapeHtml(msg.username)}</div>
+      <div>${escapeHtml(msg.content)}</div>
+      <div class="time">${formatTime(msg.created_at)}</div>
+    `;
+    container.appendChild(div);
+    scrollToBottom();
+  }
+
+  // --- ЗАГРУЗКА ---
+  async function loadMessages() {
+    const { data, error } = await supabase
+      .from('messages')
+      .select('*')
+      .order('created_at', { ascending: true })
+      .limit(100);
+    if (error) {
+      console.error('Ошибка загрузки:', error);
+      statusText.textContent = 'Ошибка БД';
+      dot.classList.add('offline');
+      return;
+    }
+    container.innerHTML = '';
+    data.forEach(addMessageToUI);
+  }
+
+  // --- ОТПРАВКА ---
+  async function sendMessage() {
+    const text = input.value.trim();
+    if (!text) return;
+    input.value = '';
+    btn.disabled = true;
+
+    const { error } = await supabase
+      .from('messages')
+      .insert([{ content: text, username: username }]);
+
+    btn.disabled = false;
+    if (error) {
+      console.error('Ошибка отправки:', error);
+      alert('Сообщение не отправлено: ' + error.message);
+      input.value = text; // вернём текст
+    }
+  }
+
+  // --- REALTIME ---
+  function setupRealtime() {
+    supabase.channel('public:messages')
+      .on('postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'messages' },
+        payload => {
+          if (payload.new.username !== username) addMessageToUI(payload.new);
         }
-
-        // --- 3. ДОБАВЛЕНИЕ СООБЩЕНИЯ НА ЭКРАН ---
-        function addMessageToUI(msg) {
-            const div = document.createElement('div');
-            div.classList.add('message');
-            // Если сообщение от меня, красим в зеленый
-            if (msg.username === username) div.classList.add('my');
-            
-            div.innerHTML = `
-                <div class="user">${msg.username}</div>
-                <div>${msg.content}</div>
-            `;
-            container.appendChild(div);
-            scrollToBottom();
+      )
+      .subscribe(status => {
+        if (status === 'SUBSCRIBED') {
+          dot.classList.remove('offline');
+          statusText.textContent = 'онлайн';
+        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          dot.classList.add('offline');
+          statusText.textContent = 'оффлайн';
         }
+      });
+  }
 
-        function scrollToBottom() {
-            container.scrollTop = container.scrollHeight;
-        }
+  // --- СОБЫТИЯ ---
+  btn.addEventListener('click', sendMessage);
+  input.addEventListener('keypress', e => { if (e.key === 'Enter') sendMessage(); });
+  // Переподключение при возврате вкладки
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) loadMessages();
+  });
 
-        // --- 4. ОТПРАВКА ---
-        async function sendMessage() {
-            const text = input.value.trim();
-            if (!text) return;
-            
-            input.value = ''; // Очищаем поле
-            
-            const { error } = await supabase
-                .from('messages')
-                .insert([{ content: text, username: username }]);
-            
-            if (error) { console.error("Ошибка отправки:", error); alert("Не отправлено!"); }
-        }
-
-        // --- 5. РЕАЛТАЙМ (СЛУШАЕМ НОВЫЕ СООБЩЕНИЯ) ---
-        function setupRealtime() {
-            supabase
-                .channel('public:messages')
-                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, 
-                    payload => {
-                        // Когда кто-то (не я) отправил сообщение, добавляем его
-                        // Проверка на дубликат нужна, чтобы мои сообщения не появлялись дважды
-                        if (payload.new.username !== username) {
-                            addMessageToUI(payload.new);
-                        }
-                    }
-                )
-                .subscribe();
-        }
-
-        // --- 6. СОБЫТИЯ ---
-        btn.addEventListener('click', sendMessage);
-        input.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMessage();
-        });
-
-        // Запуск
-        loadMessages();
-        setupRealtime();
-    </script>
+  // --- СТАРТ ---
+  loadMessages();
+  setupRealtime();
+</script>
 </body>
-</html>
+    </html>
