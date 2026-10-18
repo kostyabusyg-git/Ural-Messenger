@@ -414,29 +414,34 @@ async function findDirectChat(peerPhone){
 
 async function startDirect(phone){
   const n=normalizePhone(phone);
-  if(!n||!isValidRussianPhone(n))return;
-  if(n===myPhone)return;
-  const ex=await findDirectChat(n);
-  if(ex){
-    const{data:chat}=await supabase.from('chats').select('*').eq('id',ex).single();
-    const{data:u}=await supabase.from('users_public').select('name,avatar_url').eq('phone',n).single();
-    const title=myLocalNames[n]||(u?u.name:n);
+  if(!n||!isValidRussianPhone(n)){alert('Некорректный номер');return}
+  if(n===myPhone){alert('Это ваш номер');return}
+  try{
+    const ex=await findDirectChat(n);
+    if(ex){
+      const{data:chat}=await supabase.from('chats').select('*').eq('id',ex).single();
+      const{data:u}=await supabase.from('users_public').select('name,avatar_url').eq('phone',n).single();
+      const title=myLocalNames[n]||(u?u.name:n);
+      $('search-input').value='';
+      await loadChats();
+      openChat(ex,title,'direct',u?u.avatar_url:'',n,chat?chat.status:'accepted');
+      return;
+    }
+    const{data:chat,error}=await supabase.from('chats').insert({type:'direct',created_by:myPhone,status:'pending'}).select().single();
+    if(error){alert('Ошибка создания чата: '+error.message);return}
+    const{error:e2}=await supabase.from('chat_members').insert([
+      {chat_id:chat.id,user_phone:myPhone},
+      {chat_id:chat.id,user_phone:n}
+    ]);
+    if(e2){alert('Ошибка добавления участников: '+e2.message);return}
     $('search-input').value='';
     await loadChats();
-    openChat(ex,title,'direct',u?u.avatar_url:'',n,chat?chat.status:'accepted');
-    return;
+    openChat(chat.id,n,'direct','',n,'pending');
+  }catch(e){
+    alert('Ошибка: '+(e.message||e));
+    console.error(e);
   }
-  const{data:chat,error}=await supabase.from('chats').insert({type:'direct',created_by:myPhone,status:'pending'}).select().single();
-  if(error)return;
-  await supabase.from('chat_members').insert([
-    {chat_id:chat.id,user_phone:myPhone},
-    {chat_id:chat.id,user_phone:n}
-  ]);
-  $('search-input').value='';
-  await loadChats();
-  openChat(chat.id,n,'direct','',n,'pending');
 }
-
 async function openChat(chatId,title,type,avatarUrl,peerPhone,status){
   currentChatId=chatId;currentChatType=type;currentChatPeer=peerPhone||null;currentChatStatus=status||'accepted';
   renderedIds.clear();$('messages').innerHTML='';
