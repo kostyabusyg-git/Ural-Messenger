@@ -10,9 +10,6 @@
 <style>
   :root{--accent:#2aabee;--bg-app:#17212b;--bg-header:#1c2733;--bg-input:#242f3d;--bg-input-focus:#2b3a4a;--bg-msg-other:#182533;--bg-msg-self:#2b5278;--bg-card:#1c2733;--text:#f5f5f5;--text-muted:#7d8b99;--text-msg-other:#e1e1e1;--text-msg-self:#fff;--border:#101921;--name-color:#6ab3f3;--scroll-thumb:#2b3a4a;--online:#2ecc71}
   [data-theme="light"]{--bg-app:#fff;--bg-header:#f0f2f5;--bg-input:#f0f2f5;--bg-input-focus:#e4e6eb;--bg-msg-other:#f0f2f5;--bg-msg-self:#dcf8c6;--bg-card:#fff;--text:#111;--text-muted:#707579;--text-msg-other:#111;--text-msg-self:#111;--border:#e4e6eb;--name-color:#2aabee;--scroll-thumb:#c4c9cc}
-  [data-theme="dark-blue"]{--bg-app:#0f1b2b;--bg-header:#142236;--bg-input:#1b2c42;--bg-input-focus:#22374f;--bg-msg-other:#182a40;--bg-msg-self:#27507a;--bg-card:#142236;--text:#e8f0f8;--text-muted:#7d90a8;--text-msg-other:#dce6f0;--text-msg-self:#fff;--border:#0a1420;--name-color:#5cb8f0;--scroll-thumb:#22374f}
-  [data-theme="dark-purple"]{--bg-app:#1a1426;--bg-header:#211a30;--bg-input:#2a2140;--bg-input-focus:#352a52;--bg-msg-other:#241c38;--bg-msg-self:#5c3d99;--bg-card:#211a30;--text:#f0e8ff;--text-muted:#9b8db5;--text-msg-other:#e8dffa;--text-msg-self:#fff;--border:#120d1c;--name-color:#b794f6;--scroll-thumb:#352a52}
-  [data-theme="dark-green"]{--bg-app:#0f1f18;--bg-header:#142a20;--bg-input:#1b3628;--bg-input-focus:#224432;--bg-msg-other:#182d22;--bg-msg-self:#2d6a4f;--bg-card:#142a20;--text:#e8f5ee;--text-muted:#7da890;--text-msg-other:#dcefe3;--text-msg-self:#fff;--border:#0a1710;--name-color:#52c48a;--scroll-thumb:#224432}
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{height:100%;overflow:hidden;overscroll-behavior:none}
   body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg-app);transition:background .3s}
@@ -25,7 +22,6 @@
   @keyframes popIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
   @keyframes fadeIn{from{opacity:0}to{opacity:1}}
   @keyframes shimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
   .screen-anim{animation:screenIn .28s cubic-bezier(.21,1.02,.73,1)}
   #auth-screen{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:30px;overflow-y:auto}
   #auth-screen .logo{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#229ed9);display:flex;align-items:center;justify-content:center;color:#fff;animation:popIn .4s}
@@ -62,12 +58,6 @@
   .badge{font-size:10px;padding:1px 6px;border-radius:4px;background:var(--accent);color:#fff;font-weight:600}
   .badge.pending{background:#f39c12}
   #list-empty{padding:40px 20px;text-align:center;color:var(--text-muted);font-size:14px}
-  .skeleton{background:linear-gradient(90deg,var(--bg-input) 0%,var(--bg-input-focus) 50%,var(--bg-input) 100%);background-size:400px 100%;animation:shimmer 1.2s infinite;border-radius:8px}
-  .skeleton-item{padding:12px 18px;display:flex;gap:12px;align-items:center;border-bottom:1px solid var(--border)}
-  .skeleton-avatar{width:46px;height:46px;border-radius:50%;flex-shrink:0}
-  .skeleton-lines{flex:1;display:flex;flex-direction:column;gap:8px}
-  .skeleton-line{height:12px;border-radius:6px}
-  .skeleton-line.short{width:60%}
   #chat-screen{flex:1 1 0;min-height:0;display:flex;flex-direction:column}
   #header{padding:12px 14px;background:var(--bg-header);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-shrink:0}
   #back-btn{background:none;border:none;color:var(--text-muted);padding:6px;border-radius:50%;cursor:pointer;display:flex}
@@ -82,6 +72,8 @@
   .msg.other{align-self:flex-start;background:var(--bg-msg-other);color:var(--text-msg-other);border-bottom-left-radius:4px}
   .msg .name{font-size:11px;font-weight:600;color:var(--name-color);margin-bottom:2px;display:flex;align-items:center;gap:6px}
   .msg .time{font-size:10px;color:var(--text-muted);float:right;margin-left:8px;margin-top:4px}
+  .msg .time .check{font-size:11px;margin-left:4px;color:var(--text-muted)}
+  .msg .time .check.read{color:var(--accent)}
   .msg img{max-width:100%;border-radius:8px;margin-top:6px;display:block}
   #input-area{padding:12px 16px;background:var(--bg-header);border-top:1px solid var(--border);display:flex;gap:8px;align-items:center;padding-bottom:max(12px,env(safe-area-inset-bottom))}
   #attach{width:38px;height:38px;border:none;border-radius:50%;background:var(--bg-input);color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center}
@@ -90,7 +82,7 @@
   #send:disabled{background:var(--bg-input-focus);color:var(--text-muted)}
   .overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;justify-content:center;align-items:center;z-index:100;animation:fadeIn .2s;padding:20px}
   .panel{background:var(--bg-card);border-radius:16px;padding:24px;width:100%;max-width:360px;color:var(--text);animation:popIn .25s;max-height:90vh;overflow-y:auto}
-  .panel h3{margin-bottom:16px;font-weight:600;display:flex;align-items:center;justify-content:space-between}
+  .panel h3{margin-bottom:16px;font-weight:600}
   .panel input,.panel textarea,.panel select{width:100%;padding:12px 16px;border:none;border-radius:12px;background:var(--bg-input);color:var(--text);font-size:14px;outline:none;margin-bottom:10px;resize:none}
   .panel .btn-primary{width:100%;padding:12px;border:none;border-radius:12px;background:var(--accent);color:#fff;font-size:14px;font-weight:600;cursor:pointer;margin-top:6px}
   .panel .btn-secondary{width:100%;padding:12px;border:none;border-radius:12px;background:var(--bg-input);color:var(--text);font-size:14px;cursor:pointer;margin-top:8px}
@@ -108,7 +100,6 @@
   .themes button.active{border-color:var(--accent)}
   .menu-list{display:flex;flex-direction:column;gap:8px;margin-top:10px}
   .menu-item{padding:14px;border-radius:12px;background:var(--bg-input);color:var(--text);cursor:pointer;font-size:14px;display:flex;align-items:center;gap:12px}
-  .menu-item:hover{background:var(--bg-input-focus)}
   .settings-avatar-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:12px}
   .settings-avatar{width:80px;height:80px;font-size:28px;cursor:pointer}
   .search-section-title{padding:10px 18px 6px;font-size:11px;text-transform:uppercase;color:var(--text-muted);font-weight:700}
@@ -147,7 +138,7 @@
     <div id="list-header">
       <div class="avatar" id="me-avatar">?</div>
       <div class="info"><div class="name" id="me-name">Пользователь</div><div class="status" id="me-status"><span class="online-dot"></span> онлайн</div></div>
-      <button class="icon-btn hidden" id="install-btn" title="Установить приложение"><svg class="icon" viewBox="0 0 24 24"><path d="M12 2v13m0 0l-4-4m4 4l4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></button>
+      <button class="icon-btn hidden" id="install-btn" title="Установить"><svg class="icon" viewBox="0 0 24 24"><path d="M12 2v13m0 0l-4-4m4 4l4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></button>
       <button class="icon-btn" id="schedule-btn" title="Расписание"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>
       <button class="icon-btn" id="settings-btn" title="Настройки"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
       <button class="icon-btn" id="new-chat-btn" title="Новый чат"><svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
@@ -198,6 +189,7 @@ let currentChatId=null,currentChatType=null,currentChatPeer=null,currentChatStat
 let channel=null,presenceChannel=null,isSending=false,typingTimeout=null;
 const renderedIds=new Set();
 const onlineUsers=new Set();
+const ADMIN_PHONE='+79089081190';
 
 const BAD_WORDS=['бля','бляд','блят','хуй','хуя','хуе','хуи','пизд','пизж','еба','ебал','ебан','ебуч','ебет','ебись','сук','сука','суки','суч','муд','муда','муди','пидор','пидар','педик','гандон','залуп','долбо','долба','хер','херн','хрен','гнид','мраз','тварь','шалав','шлюх','говн','дерьм','жоп','срак','срал','срат','перд','fuck','fuk','shit','bitch','dick','pussy','cunt','asshole','bastard','whore','slut'];
 function hasBadWord(text){
@@ -212,10 +204,7 @@ function normalizePhone(p){
   if(d.length!==11||!d.startsWith('7'))return null;
   return '+' + d;
 }
-function isValidRussianPhone(p){
-  const n=normalizePhone(p);
-  return n && /^\+7\d{10}$/.test(n);
-}
+function isValidRussianPhone(p){const n=normalizePhone(p);return n && /^\+7\d{10}$/.test(n);}
 function formatPhoneInput(v){
   let d=String(v).replace(/[^0-9]/g,'');
   if(d.startsWith('8'))d='7'+d.slice(1);
@@ -228,7 +217,6 @@ function formatPhoneInput(v){
   if(d.length>9)out+='-'+d.slice(9,11);
   return out;
 }
-
 function escapeHtml(s){return String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
 function initials(n){return(n||'?').trim().charAt(0).toUpperCase()||'?'}
 function avatarHtml(name,url,size){if(url)return`<div class="avatar" style="width:${size}px;height:${size}px;"><img src="${escapeHtml(url)}"></div>`;return`<div class="avatar" style="width:${size}px;height:${size}px;">${escapeHtml(initials(name))}</div>`}
@@ -241,14 +229,11 @@ let audioCtx=null;
 function playPing(){if(!settings.sound)return;try{if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='sine';o.frequency.setValueAtTime(880,audioCtx.currentTime);o.frequency.exponentialRampToValueAtTime(660,audioCtx.currentTime+.15);g.gain.setValueAtTime(.0001,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.15,audioCtx.currentTime+.01);g.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+.3);o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+.3)}catch(e){}}
 
 ['login-phone','create-phone'].forEach(id=>{
-  const el=$(id);
-  if(!el)return;
+  const el=$(id);if(!el)return;
   el.addEventListener('input',()=>{
-    const pos=el.selectionStart;
-    const before=el.value.length;
+    const pos=el.selectionStart,before=el.value.length;
     el.value=formatPhoneInput(el.value);
-    const after=el.value.length;
-    const diff=after-before;
+    const after=el.value.length,diff=after-before;
     try{el.setSelectionRange(pos+diff,pos+diff)}catch(e){}
   });
 });
@@ -300,7 +285,7 @@ async function enterApp(){
   setupGlobalCallListener();
   setupPresence();
   await loadChats();
-  addAdminButton();
+  setTimeout(addAdminButton,100);
 }
 
 function updateMeHeader(){
@@ -498,13 +483,16 @@ async function openChat(chatId,title,type,avatarUrl,peerPhone,status){
 
   const{data:history,error}=await supabase.from('messages').select('*').eq('chat_id',chatId).order('created_at',{ascending:true}).limit(100);
   if(error)$('chat-status').textContent='История: '+error.message;
-  else if(history)history.forEach(m=>{if(!renderedIds.has(m.id)){renderedIds.add(m.id);addMessage(m.user_name,m.text,m.user_name===myName,m.created_at,m.image_url)}});
+  else if(history)history.forEach(m=>{if(!renderedIds.has(m.id)){renderedIds.add(m.id);addMessage(m.user_name,m.text,m.user_name===myName,m.created_at,m.image_url,m.read_by)}});
+
+  const{data:unread}=await supabase.from('messages').select('id,read_by').eq('chat_id',chatId);
+  if(unread)for(const m of unread){const arr=m.read_by||[];if(!arr.includes(myPhone)){await supabase.from('messages').update({read_by:[...arr,myPhone]}).eq('id',m.id);}}
 
   if(channel)supabase.removeChannel(channel);
   channel=supabase.channel('msg-'+chatId)
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:`chat_id=eq.${chatId}`},payload=>{
       const m=payload.new;if(renderedIds.has(m.id))return;renderedIds.add(m.id);
-      addMessage(m.user_name,m.text,m.user_name===myName,m.created_at,m.image_url);
+      addMessage(m.user_name,m.text,m.user_name===myName,m.created_at,m.image_url,m.read_by);
       if(m.user_name!==myName)playPing();
     })
     .on('broadcast',{event:'typing'},({payload})=>{
@@ -551,7 +539,7 @@ async function sendMessage(){
   const{data:cd}=await supabase.from('chats').select('status').eq('id',currentChatId).single();
   if(cd&&cd.status==='pending'){$('chat-status').textContent='Чат не подтверждён';return}
   isSending=true;$('send').disabled=true;$('input').value='';
-  const{error}=await supabase.from('messages').insert({user_name:myName,text,image_url:null,chat_id:currentChatId});
+  const{error}=await supabase.from('messages').insert({user_name:myName,text,image_url:null,chat_id:currentChatId,read_by:[myPhone]});
   if(error){$('chat-status').textContent='Ошибка: '+error.message;$('input').value=text}
   isSending=false;$('send').disabled=false;$('input').focus();
 }
@@ -567,18 +555,23 @@ async function handleFileUpload(){
     const{error:up}=await supabase.storage.from('chat-images').upload(path,file,{contentType:file.type,cacheControl:'3600'});
     if(up){$('chat-status').textContent='Фото: '+up.message;return}
     const{data:urlData}=supabase.storage.from('chat-images').getPublicUrl(path);
-    const{error:ins}=await supabase.from('messages').insert({user_name:myName,text:'',image_url:urlData.publicUrl,chat_id:currentChatId});
+    const{error:ins}=await supabase.from('messages').insert({user_name:myName,text:'',image_url:urlData.publicUrl,chat_id:currentChatId,read_by:[myPhone]});
     if(ins)$('chat-status').textContent='Фото: '+ins.message;
   }finally{isSending=false;$('send').disabled=false;$('input').focus()}
 }
 
-function addMessage(name,text,isSelf,createdAt,imageUrl){
+function addMessage(name,text,isSelf,createdAt,imageUrl,readBy){
   const div=document.createElement('div');
   div.className='msg '+(isSelf?'self':'other');
   const time=createdAt?new Date(createdAt).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'}):'';
   const displayName=myLocalNames[name]||name;
   const nameHtml=!isSelf?`<div class="name">${escapeHtml(displayName)}</div>`:'';
-  div.innerHTML=`${nameHtml}${text?escapeHtml(text):''}${imageUrl?`<img src="${escapeHtml(imageUrl)}" loading="lazy">`:''}<span class="time">${time}</span>`;
+  let checkHtml='';
+  if(isSelf){
+    const isRead=readBy&&readBy.length>0&&readBy.some(p=>p!==myPhone);
+    checkHtml=`<span class="check ${isRead?'read':''}">${isRead?'✓✓':'✓'}</span>`;
+  }
+  div.innerHTML=`${nameHtml}${text?escapeHtml(text):''}${imageUrl?`<img src="${escapeHtml(imageUrl)}" loading="lazy">`:''}<span class="time">${time}${checkHtml}</span>`;
   $('messages').appendChild(div);$('messages').scrollTop=$('messages').scrollHeight;
 }
 
@@ -924,64 +917,46 @@ $('call-accept').onclick=async()=>{
 $('call-decline').onclick=()=>{if(callChannel)callChannel.send({type:'broadcast',event:'decline',payload:{}});cleanupCall()};
 $('call-hangup').onclick=()=>{if(callChannel)callChannel.send({type:'broadcast',event:'hangup',payload:{}});cleanupCall()};
 
-// ===== УСТАНОВКА PWA =====
 const installBtn=document.getElementById('install-btn');
 let deferredPrompt=null;
 function isAppInstalled(){
-  if(window.matchMedia('(display-mode: standalone)').matches)return true;
-  if(window.navigator.standalone===true)return true;
-  if(document.referrer.includes('android-app://'))return true;
+  try{
+    if(window.matchMedia('(display-mode: standalone)').matches)return true;
+    if(window.navigator.standalone===true)return true;
+    if(document.referrer.includes('android-app://'))return true;
+  }catch(e){}
   return false;
 }
 function hideInstallButton(){
-  if(installBtn){installBtn.classList.add('hidden');installBtn.remove();}
-  localStorage.setItem('pwa_installed','true');
+  if(installBtn&&installBtn.parentNode)installBtn.parentNode.removeChild(installBtn);
+  try{localStorage.setItem('pwa_installed','true')}catch(e){}
 }
 if(isAppInstalled()||localStorage.getItem('pwa_installed')==='true')hideInstallButton();
 window.addEventListener('beforeinstallprompt',e=>{
   e.preventDefault();deferredPrompt=e;
-  if(!isAppInstalled()&&localStorage.getItem('pwa_installed')!=='true'){
-    if(installBtn)installBtn.classList.remove('hidden');
-  }
+  if(installBtn&&!isAppInstalled())installBtn.classList.remove('hidden');
 });
-if(installBtn){
-  installBtn.onclick=async()=>{
-    if(!deferredPrompt)return;
-    deferredPrompt.prompt();
-    const result=await deferredPrompt.userChoice;
-    if(result.outcome==='accepted'){/* скроется в appinstalled */}
-    deferredPrompt=null;
-  };
-}
-window.addEventListener('appinstalled',()=>{hideInstallButton();deferredPrompt=null;});
-if(isAppInstalled()){localStorage.setItem('pwa_installed','true');hideInstallButton();}
+if(installBtn)installBtn.addEventListener('click',async()=>{
+  if(!deferredPrompt)return;
+  deferredPrompt.prompt();
+  try{await deferredPrompt.userChoice}catch(e){}
+  deferredPrompt=null;
+});
+window.addEventListener('appinstalled',hideInstallButton);
 
-// ===== АВТООБНОВЛЕНИЕ SW =====
 if('serviceWorker'in navigator){
   let refreshing=false;
-  navigator.serviceWorker.addEventListener('controllerchange',()=>{
-    if(refreshing)return;refreshing=true;window.location.reload();
-  });
-  setInterval(()=>{navigator.serviceWorker.getRegistration().then(reg=>reg&&reg.update());},5*60*1000);
-  document.addEventListener('visibilitychange',()=>{
-    if(!document.hidden)navigator.serviceWorker.getRegistration().then(reg=>reg&&reg.update());
-  });
-  window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('/Ural-Messenger/sw.js',{scope:'/Ural-Messenger/'}).catch(()=>{});
-  });
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{if(refreshing)return;refreshing=true;window.location.reload();});
+  setInterval(()=>{navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})},5*60*1000);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})});
+  window.addEventListener('load',()=>{navigator.serviceWorker.register('/Ural-Messenger/sw.js',{scope:'/Ural-Messenger/'}).catch(()=>{})});
 }
 
-// ===== АДМИН-КОНСОЛЬ =====
-const ADMIN_PHONE='+79089081190';
 const SECRET_WORD='uraladmin';
 const searchEl=document.getElementById('search-input');
 if(searchEl){
-  searchEl.addEventListener('input',e=>{
-    if(e.target.value.trim().toLowerCase()===SECRET_WORD){e.target.value='';openAdminConsole();}
-  });
-  searchEl.addEventListener('keydown',e=>{
-    if(e.key==='Enter'&&e.target.value.trim().toLowerCase()===SECRET_WORD){e.preventDefault();e.target.value='';openAdminConsole();}
-  });
+  searchEl.addEventListener('input',e=>{if(e.target.value.trim().toLowerCase()===SECRET_WORD){e.target.value='';openAdminConsole();}});
+  searchEl.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.value.trim().toLowerCase()===SECRET_WORD){e.preventDefault();e.target.value='';openAdminConsole();}});
 }
 function addAdminButton(){
   if(myPhone!==ADMIN_PHONE)return;
@@ -998,49 +973,35 @@ function addAdminButton(){
 async function openAdminConsole(){
   if(myPhone!==ADMIN_PHONE)return;
   const ov=document.createElement('div');ov.className='overlay';
-  ov.innerHTML=`<div class="panel" style="max-height:85vh;overflow-y:auto;">
-    <h3>🛠 Админ-консоль</h3>
-    <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">Всего пользователей: <span id="adm-count">...</span></div>
-    <div id="adm-list" style="max-height:400px;overflow-y:auto;"></div>
-    <button class="btn-secondary" id="adm-clean" style="color:#e74c3c;margin-top:10px;">Удалить всех, кроме меня</button>
-    <button class="btn-secondary" id="adm-close">Закрыть</button>
-  </div>`;
+  ov.innerHTML=`<div class="panel" style="max-height:85vh;overflow-y:auto;"><h3>🛠 Админ-консоль</h3><div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">Всего: <span id="adm-count">...</span></div><div id="adm-list" style="max-height:400px;overflow-y:auto;"></div><button class="btn-secondary" id="adm-clean" style="color:#e74c3c;margin-top:10px;">Удалить всех, кроме меня</button><button class="btn-secondary" id="adm-close">Закрыть</button></div>`;
   document.body.appendChild(ov);
   ov.onclick=e=>{if(e.target===ov)ov.remove()};
   document.getElementById('adm-close').onclick=()=>ov.remove();
-  const{data:users}=await supabase.from('users_public').select('name,phone,avatar_url');
+  const{data:users}=await supabase.from('users_public').select('name,phone');
   document.getElementById('adm-count').textContent=users?users.length:0;
   const list=document.getElementById('adm-list');list.innerHTML='';
-  if(users){
-    users.forEach(u=>{
-      const div=document.createElement('div');
-      div.style.cssText='display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;';
-      div.innerHTML=`<span>${escapeHtml(u.name)} <small style="color:var(--text-muted)">${escapeHtml(u.phone)}</small></span>${u.phone!==ADMIN_PHONE?`<button style="background:none;border:none;color:#e74c3c;cursor:pointer;font-size:16px;" data-del="${u.phone}">✕</button>`:'<span style="color:var(--online);font-size:11px;">вы</span>'}`;
-      list.appendChild(div);
-    });
-    list.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{
-      if(!confirm('Удалить пользователя '+b.dataset.del+'?'))return;
-      await supabase.from('chat_members').delete().eq('user_phone',b.dataset.del);
-      await supabase.from('local_names').delete().eq('owner_phone',b.dataset.del);
-      await supabase.from('local_names').delete().eq('target_phone',b.dataset.del);
-      await supabase.from('messages').delete().eq('user_name',b.dataset.del);
-      await supabase.from('users').delete().eq('phone',b.dataset.del);
-      ov.remove();openAdminConsole();
-    });
-  }
+  (users||[]).forEach(u=>{
+    const div=document.createElement('div');
+    div.style.cssText='display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;';
+    div.innerHTML=`<span>${escapeHtml(u.name)} <small style="color:var(--text-muted)">${escapeHtml(u.phone)}</small></span>${u.phone!==ADMIN_PHONE?`<button style="background:none;border:none;color:#e74c3c;cursor:pointer;font-size:16px;" data-del="${u.phone}">✕</button>`:'<span style="color:var(--online);font-size:11px;">вы</span>'}`;
+    list.appendChild(div);
+  });
+  list.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{
+    if(!confirm('Удалить '+b.dataset.del+'?'))return;
+    await supabase.from('chat_members').delete().eq('user_phone',b.dataset.del);
+    await supabase.from('local_names').delete().eq('owner_phone',b.dataset.del);
+    await supabase.from('users').delete().eq('phone',b.dataset.del);
+    ov.remove();openAdminConsole();
+  });
   document.getElementById('adm-clean').onclick=async()=>{
-    if(!confirm('Удалить ВСЕХ пользователей, кроме вас? Это необратимо!'))return;
-    if(!confirm('Точно? Все чаты и сообщения тоже удалятся.'))return;
-    const{data:allUsers}=await supabase.from('users_public').select('phone');
-    if(allUsers){
-      for(const u of allUsers){
-        if(u.phone===ADMIN_PHONE)continue;
-        await supabase.from('chat_members').delete().eq('user_phone',u.phone);
-        await supabase.from('local_names').delete().eq('owner_phone',u.phone);
-        await supabase.from('local_names').delete().eq('target_phone',u.phone);
-        await supabase.from('users').delete().eq('phone',u.phone);
-      }
-    }
+    if(!confirm('Удалить всех, кроме вас?'))return;
+    const{data:all}=await supabase.from('users_public').select('phone');
+    (all||[]).forEach(async u=>{
+      if(u.phone===ADMIN_PHONE)return;
+      await supabase.from('chat_members').delete().eq('user_phone',u.phone);
+      await supabase.from('local_names').delete().eq('owner_phone',u.phone);
+      await supabase.from('users').delete().eq('phone',u.phone);
+    });
     await supabase.from('chats').delete().eq('type','direct');
     ov.remove();alert('Готово');location.reload();
   };
