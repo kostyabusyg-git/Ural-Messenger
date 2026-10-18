@@ -69,7 +69,7 @@
   #auth-screen input { width: 100%; max-width: 280px; padding: 12px 18px; border: 1px solid var(--bg-input); border-radius: 24px; background: var(--bg-input); color: var(--text); font-size: 15px; outline: none; text-align: center; transition: border-color .2s, box-shadow .2s, background .2s, transform .15s; }
   #auth-screen input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(42,171,238,.15); transform: scale(1.02); }
   .auth-tabs { display: flex; gap: 8px; }
-  .auth-tab { padding: 8px 20px; border: none; border-radius: 20px; background: var(--bg-input); color: var(--text-muted); font-size: 14px; cursor: pointer; transition: background .2s, color .2s, transform .15s; }
+  .auth-tab { padding: 8px 20px; border-radius: 20px; background: var(--bg-input); color: var(--text-muted); font-size: 14px; cursor: pointer; border: none; transition: background .2s, color .2s, transform .15s; }
   .auth-tab.active { background: var(--accent); color: white; }
   .auth-tab:active { transform: scale(.95); }
   .auth-form { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 280px; }
@@ -114,13 +114,15 @@
 
   #chat-screen { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; }
   #header { padding: 12px 14px; background: var(--bg-header); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; flex-shrink: 0; z-index: 2; }
-  #back-btn { background: none; border: none; color: var(--text-muted); padding: 6px; border-radius: 50%; cursor: pointer; display: flex; transition: background .2s, transform .15s; }
+  #back-btn { background: none; border: none; color: var(--text-muted); padding: 6px; border-radius: 50%; cursor: pointer; display: flex; transition: background .2s, transform .15s; flex-shrink: 0; }
   #back-btn:hover { background: var(--bg-input); color: var(--text); }
   #back-btn:active { transform: scale(.9); }
   #header .avatar { width: 36px; height: 36px; }
   #header .info { color: var(--text); flex: 1; min-width: 0; }
   #header .info .name { font-weight: 600; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   #header .info .status { font-size: 12px; color: var(--text-muted); word-break: break-word; }
+  #call-btn { color: var(--accent) !important; background: rgba(42,171,238,0.12); }
+  #call-btn:hover { background: rgba(42,171,238,0.25) !important; }
   #messages { flex: 1 1 0; min-height: 0; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 6px; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
   #messages::-webkit-scrollbar { width: 4px; }
   #messages::-webkit-scrollbar-thumb { background: var(--scroll-thumb); border-radius: 4px; }
@@ -132,14 +134,14 @@
   .msg .time { font-size: 10px; color: var(--text-muted); float: right; margin-left: 8px; margin-top: 4px; }
   .msg img { max-width: 100%; height: auto; border-radius: 8px; margin-top: 6px; display: block; cursor: pointer; }
   #input-area { padding: 12px 16px; background: var(--bg-header); border-top: 1px solid var(--border); display: flex; gap: 8px; align-items: center; flex-shrink: 0; padding-bottom: max(12px, env(safe-area-inset-bottom)); }
-  #attach { width: 38px; height: 38px; border: none; border-radius: 50%; background: var(--bg-input); color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .2s, transform .15s; }
+  #attach { width: 38px; height: 38px; border: none; border-radius: 50%; background: var(--bg-input); color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .2s, transform .15s; flex-shrink: 0; }
   #attach:hover { background: var(--bg-input-focus); color: var(--text); }
   #attach:active { transform: scale(.9); }
   #attach:disabled { opacity: .5; cursor: not-allowed; }
   #input { flex: 1; padding: 10px 16px; border: none; border-radius: 20px; background: var(--bg-input); color: var(--text); font-size: 14px; outline: none; min-width: 0; transition: background .2s; }
   #input:focus { background: var(--bg-input-focus); }
   #input::placeholder { color: var(--text-muted); }
-  #send { width: 42px; height: 42px; border: none; border-radius: 50%; background: var(--accent); color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform .15s; }
+  #send { width: 42px; height: 42px; border: none; border-radius: 50%; background: var(--accent); color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform .15s; flex-shrink: 0; }
   #send:active { transform: scale(.9); }
   #send:disabled { background: var(--bg-input-focus); color: var(--text-muted); cursor: not-allowed; }
 
@@ -180,7 +182,6 @@
   .search-section-title { padding: 10px 18px 6px; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; color: var(--text-muted); font-weight: 700; }
   .search-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: var(--accent); color: #fff; margin-left: 6px; font-weight: 600; }
 
-  /* Call UI */
   #call-overlay { z-index: 200; }
   #call-overlay .panel { text-align: center; }
   #call-avatar-wrap { display: flex; justify-content: center; margin-bottom: 12px; }
@@ -269,12 +270,9 @@
   </div>
 </div>
 
-<!-- Call overlay -->
 <div id="call-overlay" class="overlay hidden">
   <div class="panel">
-    <div id="call-avatar-wrap">
-      <div class="avatar" id="call-avatar">?</div>
-    </div>
+    <div id="call-avatar-wrap"><div class="avatar" id="call-avatar">?</div></div>
     <h3 id="call-title">Звонок</h3>
     <div id="call-status" style="color:var(--text-muted);margin-bottom:8px;">Соединение...</div>
     <div id="call-timer" style="display:none;">00:00</div>
@@ -346,7 +344,15 @@
     } catch (e) {}
   }
 
-  function normalizePhone(p) { return p.replace(/[\s\-\(\)]/g, '').replace(/^8/, '+7'); }
+  // Нормализация: всегда +7XXXXXXXXXX (11 цифр)
+  function normalizePhone(p) {
+    let digits = String(p).replace(/[^0-9]/g, '');
+    if (digits.length === 11 && digits.startsWith('8')) digits = '7' + digits.slice(1);
+    if (digits.length === 10) digits = '7' + digits;
+    if (digits.length === 11 && digits.startsWith('7')) return '+' + digits;
+    return '+' + digits;
+  }
+
   function escapeHtml(s) { return String(s).replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
   function initials(name) { return (name || '?').trim().charAt(0).toUpperCase() || '?'; }
   function avatarHtml(name, url, size) {
@@ -375,7 +381,7 @@
     const phone = normalizePhone(document.getElementById('create-phone').value.trim());
     const pass = document.getElementById('create-password').value.trim();
     if (!name || !phone || !pass) { err.textContent = 'Заполните все поля'; return; }
-    if (phone.length < 10) { err.textContent = 'Некорректный номер'; return; }
+    if (phone.length !== 12) { err.textContent = 'Введите корректный номер (11 цифр)'; return; }
     if (pass.length < 4) { err.textContent = 'Пароль минимум 4 символа'; return; }
     const { error } = await supabase.from('users').insert({ name, phone, password: pass });
     if (error) { err.textContent = error.code === '23505' ? 'Номер уже зарегистрирован' : error.message; return; }
@@ -439,7 +445,7 @@
       chatsEl.innerHTML = '<div id="list-empty">Пока нет чатов.<br>Нажми «+» или найди группу в поиске.</div>';
       return;
     }
-    const ids = memberships.map(m => m.chat_id);
+    const ids = [...new Set(memberships.map(m => m.chat_id))];
     const { data: chats, error: cErr } = await supabase.from('chats').select('*').in('id', ids);
     if (cErr) { chatsEl.innerHTML = `<div id="list-empty">Ошибка: ${escapeHtml(cErr.message)}</div>`; return; }
 
@@ -514,20 +520,35 @@
     openChat(chat.id, chat.name || 'Группа', 'group', '');
   }
 
-  async function startDirect(phone) {
+  // 🔧 ИСПРАВЛЕНО: проверка существующего direct-чата
+  async function findDirectChat(peerPhone) {
     const { data: myChats } = await supabase.from('chat_members').select('chat_id').eq('user_phone', myPhone);
-    if (myChats) {
-      for (const m of myChats) {
-        const { data: chat } = await supabase.from('chats').select('type').eq('id', m.chat_id).single();
-        if (chat && chat.type === 'direct') {
-          const { data: other } = await supabase.from('chat_members').select('user_phone').eq('chat_id', m.chat_id).eq('user_phone', phone).limit(1);
-          if (other && other.length) { searchInput.value = ''; await loadChats(); return; }
-        }
+    if (!myChats) return null;
+    for (const m of myChats) {
+      const { data: chat } = await supabase.from('chats').select('id, type').eq('id', m.chat_id).single();
+      if (chat && chat.type === 'direct') {
+        const { data: other } = await supabase.from('chat_members').select('user_phone').eq('chat_id', m.chat_id).eq('user_phone', peerPhone).limit(1);
+        if (other && other.length) return chat.id;
       }
+    }
+    return null;
+  }
+
+  async function startDirect(phone) {
+    const normalized = normalizePhone(phone);
+    if (normalized === myPhone) return;
+    const existingId = await findDirectChat(normalized);
+    if (existingId) {
+      searchInput.value = '';
+      await loadChats();
+      return;
     }
     const { data: chat, error } = await supabase.from('chats').insert({ type: 'direct', created_by: myPhone }).select().single();
     if (error) return;
-    await supabase.from('chat_members').insert([{ chat_id: chat.id, user_phone: myPhone }, { chat_id: chat.id, user_phone: phone }]);
+    await supabase.from('chat_members').insert([
+      { chat_id: chat.id, user_phone: myPhone },
+      { chat_id: chat.id, user_phone: normalized }
+    ]);
     searchInput.value = '';
     await loadChats();
   }
@@ -667,14 +688,11 @@
     inputEl.disabled = true; sendBtn.disabled = true;
 
     if (type === 'direct') {
-      // subscribe to incoming calls for this chat
       window._incomingChannel = supabase.channel('call-' + chatId, { config: { broadcast: { self: false } } });
       window._incomingChannel
         .on('broadcast', { event: 'offer' }, ({ payload }) => {
           if (!isCallActive && payload.from && payload.from !== myName) {
             window._pendingOffer = payload.sdp;
-            window._incomingChatId = chatId;
-            // Set up a channel to send answer from
             callChannel = window._incomingChannel;
             showIncoming(payload.from);
           }
@@ -791,7 +809,7 @@
       const desc = document.getElementById('g-d').value.trim();
       const pub = document.getElementById('g-p').checked;
       if (!name) { err.textContent = 'Введите название'; return; }
-      const phones = document.getElementById('g-m').value.split(',').map(s => normalizePhone(s.trim())).filter(Boolean);
+      const phones = [...new Set(document.getElementById('g-m').value.split(',').map(s => normalizePhone(s.trim())).filter(Boolean))];
       const { data: chat, error } = await supabase.from('chats').insert({ type: 'group', name, description: desc || null, is_public: pub, created_by: myPhone }).select().single();
       if (error) { err.textContent = error.message; return; }
       await supabase.from('chat_members').insert({ chat_id: chat.id, user_phone: myPhone });
@@ -802,17 +820,17 @@
 
   function showAddFriend() {
     const ov = document.createElement('div'); ov.className = 'overlay';
-    ov.innerHTML = `<div class="panel"><h3>Добавить друга</h3><input type="tel" id="f-p" placeholder="Номер телефона"><div class="err" id="f-e"></div><button class="btn-primary" id="f-ok">Найти</button><button class="btn-secondary" id="f-c">Отмена</button></div>`;
+    ov.innerHTML = `<div class="panel"><h3>Добавить друга</h3><input type="tel" id="f-p" placeholder="Номер (можно 8... или +7...)"><div class="err" id="f-e"></div><button class="btn-primary" id="f-ok">Найти</button><button class="btn-secondary" id="f-c">Отмена</button></div>`;
     document.body.appendChild(ov);
     ov.onclick = e => { if (e.target === ov) ov.remove(); };
     document.getElementById('f-c').onclick = () => ov.remove();
     document.getElementById('f-ok').onclick = async () => {
       const err = document.getElementById('f-e');
       const p = normalizePhone(document.getElementById('f-p').value.trim());
-      if (!p) { err.textContent = 'Введите номер'; return; }
+      if (!p || p.length !== 12) { err.textContent = 'Введите корректный номер'; return; }
       if (p === myPhone) { err.textContent = 'Это ваш номер'; return; }
       const { data: user } = await supabase.from('users').select('name').eq('phone', p).single();
-      if (!user) { err.textContent = 'Не найден'; return; }
+      if (!user) { err.textContent = 'Пользователь не найден'; return; }
       ov.remove(); await startDirect(p);
     };
   }
