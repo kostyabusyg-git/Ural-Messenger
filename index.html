@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мой Мессенджер</title>
+    <!-- Подключаем Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        /* Базовые стили в стиле Telegram (сине-белая тема) */
+        body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #e6ebee; height: 100vh; display: flex; justify-content: center; align-items: center; }
+        .app { width: 100%; max-width: 400px; height: 90vh; background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden; }
+        .header { background: #517da2; color: white; padding: 15px; font-weight: bold; text-align: center; }
+        .chat-box { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: #e6ebee; }
+        .message { max-width: 80%; padding: 8px 12px; border-radius: 12px; background: white; align-self: flex-start; box-shadow: 0 1px 2px rgba(0,0,0,0.1); font-size: 14px; word-break: break-word; }
+        .message.my { background: #effdde; align-self: flex-end; }
+        .message .user { font-size: 10px; color: #517da2; font-weight: bold; margin-bottom: 4px; }
+        .input-area { display: flex; padding: 10px; background: white; border-top: 1px solid #ddd; }
+        input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 20px; outline: none; font-size: 14px; }
+        button { background: #517da2; color: white; border: none; padding: 10px 20px; margin-left: 10px; border-radius: 20px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #3e6282; }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <div class="header">Общий чат</div>
+        <div class="chat-box" id="messages-container"></div>
+        <div class="input-area">
+            <input type="text" id="message-input" placeholder="Написать сообщение..." autocomplete="off">
+            <button id="send-btn">Отпр.</button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. НАСТРОЙКА ---
+        const SUPABASE_URL = 'ВСТАВЬ_СЮДА_СВОЙ_URL';
+        const SUPABASE_ANON_KEY = 'ВСТАВЬ_СЮДА_СВОЙ_ANON_KEY';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Для простоты имя пользователя спрашивается один раз при входе
+        let username = prompt("Введи свое имя:", "Гость");
+        if (!username) username = "Гость";
+
+        const container = document.getElementById('messages-container');
+        const input = document.getElementById('message-input');
+        const btn = document.getElementById('send-btn');
+
+        // --- 2. ЗАГРУЗКА СТАРЫХ СООБЩЕНИЙ ---
+        async function loadMessages() {
+            const { data, error } = await supabase
+                .from('messages')
+                .select('*')
+                .order('created_at', { ascending: true })
+                .limit(50);
+            
+            if (error) { console.error(error); return; }
+            container.innerHTML = '';
+            data.forEach(msg => addMessageToUI(msg));
+            scrollToBottom();
+        }
+
+        // --- 3. ДОБАВЛЕНИЕ СООБЩЕНИЯ НА ЭКРАН ---
+        function addMessageToUI(msg) {
+            const div = document.createElement('div');
+            div.classList.add('message');
+            // Если сообщение от меня, красим в зеленый
+            if (msg.username === username) div.classList.add('my');
+            
+            div.innerHTML = `
+                <div class="user">${msg.username}</div>
+                <div>${msg.content}</div>
+            `;
+            container.appendChild(div);
+            scrollToBottom();
+        }
+
+        function scrollToBottom() {
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // --- 4. ОТПРАВКА ---
+        async function sendMessage() {
+            const text = input.value.trim();
+            if (!text) return;
+            
+            input.value = ''; // Очищаем поле
+            
+            const { error } = await supabase
+                .from('messages')
+                .insert([{ content: text, username: username }]);
+            
+            if (error) { console.error("Ошибка отправки:", error); alert("Не отправлено!"); }
+        }
+
+        // --- 5. РЕАЛТАЙМ (СЛУШАЕМ НОВЫЕ СООБЩЕНИЯ) ---
+        function setupRealtime() {
+            supabase
+                .channel('public:messages')
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, 
+                    payload => {
+                        // Когда кто-то (не я) отправил сообщение, добавляем его
+                        // Проверка на дубликат нужна, чтобы мои сообщения не появлялись дважды
+                        if (payload.new.username !== username) {
+                            addMessageToUI(payload.new);
+                        }
+                    }
+                )
+                .subscribe();
+        }
+
+        // --- 6. СОБЫТИЯ ---
+        btn.addEventListener('click', sendMessage);
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        // Запуск
+        loadMessages();
+        setupRealtime();
+    </script>
+</body>
+</html>
