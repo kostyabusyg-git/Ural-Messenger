@@ -1,4 +1,4 @@
-const CACHE = 'ural-v10'; // Меняй версию при каждом деплое (v2, v3...)
+const CACHE = 'ural-v10.0'; // Меняй версию при каждом деплое (v2, v3...)
 const ASSETS = [
   '/Ural-Messenger/',
   '/Ural-Messenger/index.html',
