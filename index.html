@@ -75,8 +75,13 @@
   .msg .time .check{font-size:11px;margin-left:4px;color:var(--text-muted)}
   .msg .time .check.read{color:var(--accent)}
   .msg img{max-width:100%;border-radius:8px;margin-top:6px;display:block}
+  .msg audio{max-width:100%;margin-top:6px;display:block}
+  .circle-msg{width:180px;height:180px;border-radius:50%;object-fit:cover;margin-top:6px;display:block;background:#000}
+  .reactions{display:flex;gap:4px;margin-top:4px;flex-wrap:wrap}
+  .reaction{font-size:12px;padding:2px 6px;border-radius:10px;background:var(--bg-input);cursor:pointer}
+  .reply-preview{font-size:11px;color:var(--text-muted);border-left:2px solid var(--accent);padding-left:6px;margin-bottom:4px;opacity:.85}
   #input-area{padding:12px 16px;background:var(--bg-header);border-top:1px solid var(--border);display:flex;gap:8px;align-items:center;padding-bottom:max(12px,env(safe-area-inset-bottom))}
-  #attach{width:38px;height:38px;border:none;border-radius:50%;background:var(--bg-input);color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center}
+  #attach,#circle-btn,#voice-btn{width:38px;height:38px;border:none;border-radius:50%;background:var(--bg-input);color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center}
   #input{flex:1;padding:10px 16px;border:none;border-radius:20px;background:var(--bg-input);color:var(--text);font-size:14px;outline:none;min-width:0}
   #send{width:42px;height:42px;border:none;border-radius:50%;background:var(--accent);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center}
   #send:disabled{background:var(--bg-input-focus);color:var(--text-muted)}
@@ -122,6 +127,7 @@
   .schedule-item img{max-width:100%;border-radius:8px;margin-top:6px}
   #typing-indicator{padding:0 16px 4px;font-size:11px;color:var(--text-muted);height:16px}
   #request-panel{padding:16px;background:var(--bg-header);border-bottom:1px solid var(--border);text-align:center}
+  .msg-menu{display:flex;align-items:center;gap:4px;animation:popIn .15s;position:fixed;background:var(--bg-card);border-radius:12px;padding:8px;z-index:500;box-shadow:0 4px 20px rgba(0,0,0,.4)}
 </style>
 </head>
 <body>
@@ -158,6 +164,8 @@
     <div id="messages"></div>
     <div id="input-area">
       <button id="attach"><svg class="icon" viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></button>
+      <button id="circle-btn" title="Кружок"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg></button>
+      <button id="voice-btn" title="Голосовое"><svg class="icon" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></button>
       <input type="file" id="file-input" accept="image/*" hidden>
       <input type="text" id="input" placeholder="Написать сообщение..." disabled>
       <button id="send" disabled><svg class="icon" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
@@ -175,6 +183,15 @@
     <button class="call-btn hangup" id="call-hangup" style="display:none;"><svg class="icon" viewBox="0 0 24 24"><path d="M10.68 13.31a16 16 0 0 0 3.41 2.6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7 2 2 0 0 1 1.72 2v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.42 19.42 0 0 1-3.33-2.67m-2.67-3.34a19.79 19.79 0 0 1-3.07-8.63A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91"/><line x1="23" y1="1" x2="1" y2="23"/></svg></button>
   </div>
 </div></div>
+<div id="circle-overlay" class="overlay hidden" style="z-index:300;"><div class="panel" style="text-align:center;max-width:300px;">
+  <h3>Кружок</h3>
+  <div style="position:relative;width:220px;height:220px;margin:0 auto 16px;border-radius:50%;overflow:hidden;background:#000;">
+    <video id="circle-preview" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover;transform:scaleX(-1);"></video>
+  </div>
+  <div id="circle-timer" style="font-size:24px;font-weight:600;margin-bottom:16px;">00:00</div>
+  <button class="btn-primary" id="circle-record">Начать запись</button>
+  <button class="btn-secondary" id="circle-cancel">Отмена</button>
+</div></div>
 <audio id="remote-audio" autoplay></audio>
 
 <script type="module">
@@ -187,6 +204,7 @@ const $=id=>document.getElementById(id);
 let myName='',myPhone='',myAvatar='',myLocalNames={};
 let currentChatId=null,currentChatType=null,currentChatPeer=null,currentChatStatus=null;
 let channel=null,presenceChannel=null,isSending=false,typingTimeout=null;
+let replyToId=null;
 const renderedIds=new Set();
 const onlineUsers=new Set();
 const ADMIN_PHONE='+79089081190';
@@ -204,7 +222,7 @@ function normalizePhone(p){
   if(d.length!==11||!d.startsWith('7'))return null;
   return '+' + d;
 }
-function isValidRussianPhone(p){const n=normalizePhone(p);return n && /^\+7\d{10}$/.test(n);}
+function isValidRussianPhone(p){const n=normalizePhone(p);return n && /^\+79\d{9}$/.test(n);}
 function formatPhoneInput(v){
   let d=String(v).replace(/[^0-9]/g,'');
   if(d.startsWith('8'))d='7'+d.slice(1);
@@ -247,7 +265,7 @@ $('create-btn').onclick=async()=>{
   if(name.length<2){err.textContent='Имя минимум 2 символа';return}
   if(hasBadWord(name)){err.textContent='Имя содержит запрещённые слова';return}
   const phone=normalizePhone(phoneRaw);
-  if(!phone||!isValidRussianPhone(phone)){err.textContent='Только российский номер: +7 XXX XXX-XX-XX';return}
+  if(!phone||!isValidRussianPhone(phone)){err.textContent='Только российский мобильный: +79XXXXXXXXX';return}
   if(pass.length<4){err.textContent='Пароль минимум 4';return}
   const{error}=await supabase.from('users').insert({name,phone,password:pass});
   if(error){err.textContent=error.code==='23505'?'Номер занят':error.message;return}
@@ -259,7 +277,7 @@ $('create-btn').onclick=async()=>{
 $('login-btn').onclick=async()=>{
   const err=$('auth-error'),phoneRaw=$('login-phone').value.trim(),pass=$('login-password').value.trim();
   const phone=normalizePhone(phoneRaw);
-  if(!phone||!isValidRussianPhone(phone)){err.textContent='Только российский номер: +7 XXX XXX-XX-XX';return}
+  if(!phone||!isValidRussianPhone(phone)){err.textContent='Только российский мобильный: +79XXXXXXXXX';return}
   if(!pass){err.textContent='Введите пароль';return}
   const{data,error}=await supabase.from('users').select('name,password,avatar_url').eq('phone',phone).single();
   if(error||!data){err.textContent='Не найден';return}
@@ -329,7 +347,7 @@ function updateOnlineUI(){
 }
 
 async function loadChats(){
-  $('chats').innerHTML=Array(3).fill('<div class="skeleton-item"><div class="skeleton skeleton-avatar"></div><div class="skeleton-lines"><div class="skeleton skeleton-line" style="width:70%"></div><div class="skeleton skeleton-line short"></div></div></div>').join('');
+  $('chats').innerHTML='';
   const{data:memberships,error:mErr}=await supabase.from('chat_members').select('chat_id').eq('user_phone',myPhone);
   if(mErr){$('chats').innerHTML=`<div id="list-empty">Ошибка: ${escapeHtml(mErr.message)}</div>`;return}
   if(!memberships||!memberships.length){$('chats').innerHTML='<div id="list-empty">Нет чатов. Нажми «+» или найди группу.</div>';return}
@@ -442,12 +460,17 @@ async function startDirect(phone){
     console.error(e);
   }
 }
+
 async function openChat(chatId,title,type,avatarUrl,peerPhone,status){
   currentChatId=chatId;currentChatType=type;currentChatPeer=peerPhone||null;currentChatStatus=status||'accepted';
   renderedIds.clear();$('messages').innerHTML='';
   const oldReq=$('request-panel');if(oldReq)oldReq.remove();
+  replyToId=null;$('input').placeholder='Написать сообщение...';
   $('chat-title').textContent=title;
   $('chat-avatar').outerHTML=avatarHtml(title,avatarUrl,36).replace('class="avatar"','id="chat-avatar" class="avatar"');
+  $('chat-avatar').onclick=()=>{
+    if(peerPhone)showProfile(peerPhone);
+  };
   $('chat-status').textContent='Загрузка...';
   const isPending=status==='pending';
   $('call-btn').classList.toggle('hidden',type!=='direct'||isPending);
@@ -488,7 +511,7 @@ async function openChat(chatId,title,type,avatarUrl,peerPhone,status){
 
   const{data:history,error}=await supabase.from('messages').select('*').eq('chat_id',chatId).order('created_at',{ascending:true}).limit(100);
   if(error)$('chat-status').textContent='История: '+error.message;
-  else if(history)history.forEach(m=>{if(!renderedIds.has(m.id)){renderedIds.add(m.id);addMessage(m.user_name,m.text,m.user_name===myName,m.created_at,m.image_url,m.read_by)}});
+  else if(history)history.forEach(m=>{if(!renderedIds.has(m.id)){renderedIds.add(m.id);addMessage(m.user_name,m.text,m.user_name===myName,m.created_at,m.image_url,m.video_url,m.audio_url,m.reply_to,m.reactions,m.id,m.read_by)}});
 
   const{data:unread}=await supabase.from('messages').select('id,read_by').eq('chat_id',chatId);
   if(unread)for(const m of unread){const arr=m.read_by||[];if(!arr.includes(myPhone)){await supabase.from('messages').update({read_by:[...arr,myPhone]}).eq('id',m.id);}}
@@ -497,8 +520,22 @@ async function openChat(chatId,title,type,avatarUrl,peerPhone,status){
   channel=supabase.channel('msg-'+chatId)
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:`chat_id=eq.${chatId}`},payload=>{
       const m=payload.new;if(renderedIds.has(m.id))return;renderedIds.add(m.id);
-      addMessage(m.user_name,m.text,m.user_name===myName,m.created_at,m.image_url,m.read_by);
+      addMessage(m.user_name,m.text,m.user_name===myName,m.created_at,m.image_url,m.video_url,m.audio_url,m.reply_to,m.reactions,m.id,m.read_by);
       if(m.user_name!==myName)playPing();
+    })
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'messages',filter:`chat_id=eq.${chatId}`},payload=>{
+      const m=payload.new;
+      const el=document.querySelector(`.msg[data-id="${m.id}"]`);
+      if(el){
+        const r=el.querySelector('.reactions');
+        if(r&&m.reactions&&Object.keys(m.reactions).length){
+          r.innerHTML=Object.entries(m.reactions).map(([e,u])=>`<span class="reaction" data-emoji="${e}">${e} ${u.length}</span>`).join('');
+        }
+      }
+    })
+    .on('postgres_changes',{event:'DELETE',schema:'public',table:'messages',filter:`chat_id=eq.${chatId}`},payload=>{
+      const el=document.querySelector(`.msg[data-id="${payload.old.id}"]`);
+      if(el)el.remove();
     })
     .on('broadcast',{event:'typing'},({payload})=>{
       if(payload.from!==myName&&currentChatId===chatId){
@@ -532,7 +569,7 @@ async function openChat(chatId,title,type,avatarUrl,peerPhone,status){
 
 $('back-btn').onclick=()=>{
   if(channel){supabase.removeChannel(channel);channel=null}
-  currentChatId=null;currentChatPeer=null;currentChatStatus=null;
+  currentChatId=null;currentChatPeer=null;currentChatStatus=null;replyToId=null;
   $('chat-screen').classList.add('hidden');$('list-screen').classList.remove('hidden');$('list-screen').classList.add('screen-anim');
   loadChats();
 };
@@ -544,9 +581,9 @@ async function sendMessage(){
   const{data:cd}=await supabase.from('chats').select('status').eq('id',currentChatId).single();
   if(cd&&cd.status==='pending'){$('chat-status').textContent='Чат не подтверждён';return}
   isSending=true;$('send').disabled=true;$('input').value='';
-  const{error}=await supabase.from('messages').insert({user_name:myName,text,image_url:null,chat_id:currentChatId,read_by:[myPhone]});
+  const{error}=await supabase.from('messages').insert({user_name:myName,text,image_url:null,chat_id:currentChatId,read_by:[myPhone],reply_to:replyToId});
   if(error){$('chat-status').textContent='Ошибка: '+error.message;$('input').value=text}
-  isSending=false;$('send').disabled=false;$('input').focus();
+  isSending=false;$('send').disabled=false;replyToId=null;$('input').placeholder='Написать сообщение...';$('input').focus();
 }
 
 async function handleFileUpload(){
@@ -565,9 +602,10 @@ async function handleFileUpload(){
   }finally{isSending=false;$('send').disabled=false;$('input').focus()}
 }
 
-function addMessage(name,text,isSelf,createdAt,imageUrl,readBy){
+function addMessage(name,text,isSelf,createdAt,imageUrl,videoUrl,audioUrl,replyTo,reactions,msgId,readBy){
   const div=document.createElement('div');
   div.className='msg '+(isSelf?'self':'other');
+  if(msgId)div.dataset.id=msgId;
   const time=createdAt?new Date(createdAt).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'}):'';
   const displayName=myLocalNames[name]||name;
   const nameHtml=!isSelf?`<div class="name">${escapeHtml(displayName)}</div>`:'';
@@ -576,8 +614,29 @@ function addMessage(name,text,isSelf,createdAt,imageUrl,readBy){
     const isRead=readBy&&readBy.length>0&&readBy.some(p=>p!==myPhone);
     checkHtml=`<span class="check ${isRead?'read':''}">${isRead?'✓✓':'✓'}</span>`;
   }
-  div.innerHTML=`${nameHtml}${text?escapeHtml(text):''}${imageUrl?`<img src="${escapeHtml(imageUrl)}" loading="lazy">`:''}<span class="time">${time}${checkHtml}</span>`;
+  const replyHtml=replyTo?`<div class="reply-preview">Ответ на сообщение</div>`:'';
+  const circleHtml=videoUrl?`<video src="${escapeHtml(videoUrl)}" class="circle-msg" autoplay loop muted playsinline></video>`:'';
+  const audioHtml=audioUrl?`<audio controls src="${escapeHtml(audioUrl)}"></audio>`:'';
+  const reactionsHtml=reactions&&Object.keys(reactions).length?`<div class="reactions">${Object.entries(reactions).map(([e,u])=>`<span class="reaction" data-emoji="${e}">${e} ${u.length}</span>`).join('')}</div>`:'';
+  div.innerHTML=`${nameHtml}${replyHtml}<span class="msg-text">${text?escapeHtml(text):''}</span>${imageUrl?`<img src="${escapeHtml(imageUrl)}" loading="lazy">`:''}${circleHtml}${audioHtml}${reactionsHtml}<span class="time">${time}${checkHtml}</span>`;
   $('messages').appendChild(div);$('messages').scrollTop=$('messages').scrollHeight;
+}
+
+async function showProfile(phone){
+  const{data:u}=await supabase.from('users_public').select('name,bio,avatar_url').eq('phone',phone).single();
+  const ov=document.createElement('div');ov.className='overlay';
+  ov.innerHTML=`<div class="panel" style="text-align:center;">
+    ${avatarHtml(u?u.name:phone,u?u.avatar_url:'',80).replace('class="avatar"','class="avatar settings-avatar"')}
+    <h3 style="margin-top:12px;">${escapeHtml(u?u.name:phone)}</h3>
+    <div style="color:var(--text-muted);font-size:13px;margin-bottom:12px;">${escapeHtml(phone)}</div>
+    ${u&&u.bio?`<div style="margin-bottom:16px;">${escapeHtml(u.bio)}</div>`:''}
+    <button class="btn-primary" id="prof-msg">Написать</button>
+    <button class="btn-secondary" id="prof-close">Закрыть</button>
+  </div>`;
+  document.body.appendChild(ov);
+  ov.onclick=e=>{if(e.target===ov)ov.remove()};
+  document.getElementById('prof-close').onclick=()=>ov.remove();
+  document.getElementById('prof-msg').onclick=()=>{ov.remove();$('input').focus();};
 }
 
 async function renameChat(peerPhone){
@@ -613,6 +672,151 @@ async function renameChat(peerPhone){
     ov.remove();await loadChats();
   };
 }
+
+// ===== МЕНЮ СООБЩЕНИЯ (реакции/ответ/изменение/удаление) =====
+let msgMenuEl=null;
+function showMessageMenu(msgEl,msgId){
+  if(msgMenuEl)msgMenuEl.remove();
+  const menu=document.createElement('div');menu.className='msg-menu';
+  const rect=msgEl.getBoundingClientRect();
+  menu.style.left=Math.min(rect.left,window.innerWidth-260)+'px';
+  menu.style.top=Math.max(rect.top-56,10)+'px';
+  const emojis=['❤️','🔥','😄','👍','😢'];
+  emojis.forEach(e=>{
+    const b=document.createElement('button');
+    b.textContent=e;b.style.cssText='background:none;border:none;font-size:22px;cursor:pointer;padding:4px;';
+    b.onclick=async()=>{
+      const{data:msg}=await supabase.from('messages').select('reactions').eq('id',msgId).single();
+      const r=msg.reactions||{};
+      r[e]=r[e]||[];
+      if(!r[e].includes(myPhone))r[e].push(myPhone);
+      else r[e]=r[e].filter(p=>p!==myPhone);
+      if(r[e].length===0)delete r[e];
+      await supabase.from('messages').update({reactions:r}).eq('id',msgId);
+      menu.remove();msgMenuEl=null;
+    };
+    menu.appendChild(b);
+  });
+  const replyBtn=document.createElement('button');
+  replyBtn.textContent='↩️';replyBtn.style.cssText='background:none;border:none;font-size:18px;cursor:pointer;padding:4px;';
+  replyBtn.onclick=()=>{replyToId=msgId;$('input').placeholder='Ответ на сообщение...';menu.remove();msgMenuEl=null;$('input').focus();};
+  menu.appendChild(replyBtn);
+  if(msgEl.classList.contains('self')){
+    const editBtn=document.createElement('button');
+    editBtn.textContent='✏️';editBtn.style.cssText='background:none;border:none;font-size:18px;cursor:pointer;padding:4px;';
+    editBtn.onclick=async()=>{
+      const cur=msgEl.querySelector('.msg-text')?.textContent||'';
+      const newText=prompt('Редактировать:',cur);
+      if(newText!==null){
+        await supabase.from('messages').update({text:newText,edited_at:new Date().toISOString()}).eq('id',msgId);
+        msgEl.querySelector('.msg-text').textContent=newText;
+      }
+      menu.remove();msgMenuEl=null;
+    };
+    menu.appendChild(editBtn);
+    const delBtn=document.createElement('button');
+    delBtn.textContent='🗑️';delBtn.style.cssText='background:none;border:none;font-size:18px;cursor:pointer;padding:4px;';
+    delBtn.onclick=async()=>{
+      if(confirm('Удалить сообщение?')){
+        await supabase.from('messages').delete().eq('id',msgId);
+        msgEl.remove();
+      }
+      menu.remove();msgMenuEl=null;
+    };
+    menu.appendChild(delBtn);
+  }
+  document.body.appendChild(menu);msgMenuEl=menu;
+  setTimeout(()=>document.addEventListener('click',()=>{if(msgMenuEl)msgMenuEl.remove();msgMenuEl=null;},{once:true}),100);
+}
+document.addEventListener('contextmenu',e=>{
+  const msg=e.target.closest('.msg');
+  if(msg&&msg.dataset.id){e.preventDefault();showMessageMenu(msg,msg.dataset.id);}
+});
+let longPressTimer;
+document.addEventListener('touchstart',e=>{
+  const msg=e.target.closest('.msg');
+  if(msg&&msg.dataset.id){longPressTimer=setTimeout(()=>showMessageMenu(msg,msg.dataset.id),500);}
+});
+document.addEventListener('touchend',()=>clearTimeout(longPressTimer));
+document.addEventListener('touchmove',()=>clearTimeout(longPressTimer));
+
+// ===== КРУЖКИ =====
+let circleStream=null,circleRecorder=null,circleChunks=[],circleTimerInterval=null,circleStartTime=null,circleRecording=false;
+const circleOverlay=document.getElementById('circle-overlay'),circlePreview=document.getElementById('circle-preview'),circleTimer=document.getElementById('circle-timer'),circleRecordBtn=document.getElementById('circle-record'),circleCancelBtn=document.getElementById('circle-cancel'),circleBtn=document.getElementById('circle-btn');
+function circleFmt(s){return`${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`}
+function startCircleTimer(){circleStartTime=Date.now();circleTimerInterval=setInterval(()=>{circleTimer.textContent=circleFmt(Math.floor((Date.now()-circleStartTime)/1000))},1000)}
+function stopCircleTimer(){if(circleTimerInterval)clearInterval(circleTimerInterval);circleTimerInterval=null;circleTimer.textContent='00:00'}
+async function openCircleRecorder(){
+  if(!currentChatId){alert('Открой чат');return}
+  circleOverlay.classList.remove('hidden');
+  circleRecordBtn.textContent='Начать запись';circleRecordBtn.className='btn-primary';circleRecording=false;
+  try{
+    circleStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:true});
+    circlePreview.srcObject=circleStream;
+  }catch(e){alert('Нет камеры: '+e.message);closeCircleRecorder();}
+}
+function closeCircleRecorder(){
+  if(circleRecorder&&circleRecorder.state!=='inactive')circleRecorder.stop();
+  if(circleStream){circleStream.getTracks().forEach(t=>t.stop());circleStream=null;}
+  circlePreview.srcObject=null;stopCircleTimer();circleOverlay.classList.add('hidden');circleChunks=[];circleRecording=false;
+}
+async function startCircleRecording(){
+  if(!circleStream)return;
+  circleChunks=[];
+  const mime=MediaRecorder.isTypeSupported('video/webm;codecs=vp9')?'video/webm;codecs=vp9':'video/webm';
+  circleRecorder=new MediaRecorder(circleStream,{mimeType:mime});
+  circleRecorder.ondataavailable=e=>{if(e.data.size>0)circleChunks.push(e.data)};
+  circleRecorder.onstop=async()=>{const blob=new Blob(circleChunks,{type:'video/webm'});await sendCircle(blob);};
+  circleRecorder.start();circleRecording=true;
+  circleRecordBtn.textContent='Остановить и отправить';circleRecordBtn.className='btn-secondary';
+  startCircleTimer();
+}
+async function sendCircle(blob){
+  closeCircleRecorder();
+  if(blob.size===0)return;
+  if(blob.size>5*1024*1024){alert('Кружок больше 5 МБ');return}
+  const path=`circles/${Date.now()}_${Math.random().toString(36).slice(2,8)}.webm`;
+  const{error:upErr}=await supabase.storage.from('chat-images').upload(path,blob,{contentType:'video/webm',cacheControl:'3600'});
+  if(upErr){alert('Ошибка загрузки: '+upErr.message);return}
+  const{data:urlData}=supabase.storage.from('chat-images').getPublicUrl(path);
+  const{error:insErr}=await supabase.from('messages').insert({user_name:myName,text:'',image_url:null,video_url:urlData.publicUrl,chat_id:currentChatId,read_by:[myPhone]});
+  if(insErr)alert('Ошибка отправки: '+insErr.message);
+}
+circleBtn.onclick=openCircleRecorder;
+circleCancelBtn.onclick=closeCircleRecorder;
+circleRecordBtn.onclick=()=>{if(!circleRecording)startCircleRecording();else if(circleRecorder&&circleRecorder.state!=='inactive')circleRecorder.stop();};
+
+// ===== ГОЛОСОВЫЕ =====
+let voiceStream=null,voiceRecorder=null,voiceChunks=[],voiceRecording=false;
+const voiceBtn=document.getElementById('voice-btn');
+async function startVoiceRecording(){
+  if(!currentChatId){alert('Открой чат');return}
+  try{
+    voiceStream=await navigator.mediaDevices.getUserMedia({audio:true});
+    voiceChunks=[];
+    voiceRecorder=new MediaRecorder(voiceStream,{mimeType:'audio/webm'});
+    voiceRecorder.ondataavailable=e=>{if(e.data.size>0)voiceChunks.push(e.data)};
+    voiceRecorder.onstop=async()=>{const blob=new Blob(voiceChunks,{type:'audio/webm'});await sendVoice(blob);};
+    voiceRecorder.start();voiceRecording=true;voiceBtn.style.color='#e74c3c';voiceBtn.title='Запись... нажми чтобы отправить';
+  }catch(e){alert('Нет микрофона: '+e.message);}
+}
+async function stopVoiceRecording(){
+  if(voiceRecorder&&voiceRecorder.state!=='inactive')voiceRecorder.stop();
+  if(voiceStream){voiceStream.getTracks().forEach(t=>t.stop());voiceStream=null;}
+  voiceRecording=false;voiceBtn.style.color='';voiceBtn.title='Голосовое';
+}
+async function sendVoice(blob){
+  await stopVoiceRecording();
+  if(blob.size===0)return;
+  if(blob.size>5*1024*1024){alert('Аудио больше 5 МБ');return}
+  const path=`voices/${Date.now()}_${Math.random().toString(36).slice(2,8)}.webm`;
+  const{error:upErr}=await supabase.storage.from('chat-images').upload(path,blob,{contentType:'audio/webm',cacheControl:'3600'});
+  if(upErr){alert('Ошибка загрузки: '+upErr.message);return}
+  const{data:urlData}=supabase.storage.from('chat-images').getPublicUrl(path);
+  const{error:insErr}=await supabase.from('messages').insert({user_name:myName,text:'',image_url:null,audio_url:urlData.publicUrl,chat_id:currentChatId,read_by:[myPhone]});
+  if(insErr)alert('Ошибка отправки: '+insErr.message);
+}
+voiceBtn.onclick=()=>{if(!voiceRecording)startVoiceRecording();else stopVoiceRecording();};
 
 $('group-settings-btn').onclick=async()=>{
   if(!currentChatId||currentChatType!=='group')return;
@@ -687,7 +891,7 @@ $('group-settings-btn').onclick=async()=>{
 
   if($('grp-add-btn'))$('grp-add-btn').onclick=async()=>{
     const p=normalizePhone($('grp-add').value.trim());
-    if(!p||!isValidRussianPhone(p)){$('grp-err').textContent='Только российский номер';return}
+    if(!p||!isValidRussianPhone(p)){$('grp-err').textContent='Только российский мобильный';return}
     const{data:u}=await supabase.from('users_public').select('phone').eq('phone',p).single();
     if(!u){$('grp-err').textContent='Пользователь не найден';return}
     const{data:ex}=await supabase.from('chat_members').select('id').eq('chat_id',currentChatId).eq('user_phone',p).limit(1);
@@ -714,7 +918,7 @@ $('new-chat-btn').onclick=()=>{
 
 function showCreateGroup(){
   const ov=document.createElement('div');ov.className='overlay';
-  ov.innerHTML=`<div class="panel"><h3>Создать группу</h3><input type="text" id="g-n" placeholder="Название" maxlength="40"><textarea id="g-d" placeholder="Описание" rows="2"></textarea><label class="check"><input type="checkbox" id="g-p"> Публичная</label><input type="text" id="g-m" placeholder="Номера через запятую (только РФ)"><div class="err" id="g-e"></div><button class="btn-primary" id="g-ok">Создать</button><button class="btn-secondary" id="g-c">Отмена</button></div>`;
+  ov.innerHTML=`<div class="panel"><h3>Создать группу</h3><input type="text" id="g-n" placeholder="Название" maxlength="40"><textarea id="g-d" placeholder="Описание" rows="2"></textarea><label class="check"><input type="checkbox" id="g-p"> Публичная</label><input type="text" id="g-m" placeholder="Номера через запятую"><div class="err" id="g-e"></div><button class="btn-primary" id="g-ok">Создать</button><button class="btn-secondary" id="g-c">Отмена</button></div>`;
   document.body.appendChild(ov);ov.onclick=e=>{if(e.target===ov)ov.remove()};
   $('g-c').onclick=()=>ov.remove();
   $('g-ok').onclick=async()=>{
@@ -741,7 +945,7 @@ function showAddFriend(){
   fpi.addEventListener('input',()=>{fpi.value=formatPhoneInput(fpi.value)});
   $('f-ok').onclick=async()=>{
     const err=$('f-e'),p=normalizePhone(fpi.value.trim());
-    if(!p||!isValidRussianPhone(p)){err.textContent='Только российский номер';return}
+    if(!p||!isValidRussianPhone(p)){err.textContent='Только российский мобильный';return}
     if(p===myPhone){err.textContent='Это ваш номер';return}
     const{data:u}=await supabase.from('users_public').select('name').eq('phone',p).single();
     if(!u){err.textContent='Пользователь не найден';return}
@@ -841,20 +1045,16 @@ const ICE={iceServers:[
   {urls:'turn:global.relay.metered.ca:443',username:'f142d15a30fab21c8028169a',credential:'8u1HQJ6Ms1cmybhb'},
   {urls:'turns:global.relay.metered.ca:443?transport=tcp',username:'f142d15a30fab21c8028169a',credential:'8u1HQJ6Ms1cmybhb'}
 ]};
-
 function callFmt(s){return`${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`}
 function startTimer(){callStartTime=Date.now();$('call-timer').style.display='block';callTimerInterval=setInterval(()=>{$('call-timer').textContent=callFmt(Math.floor((Date.now()-callStartTime)/1000))},1000)}
 function stopTimer(){if(callTimerInterval)clearInterval(callTimerInterval);callTimerInterval=null;$('call-timer').style.display='none';$('call-timer').textContent='00:00'}
-
 function resetCallUI(){callOverlay.classList.add('hidden');$('call-accept').style.display='none';$('call-hangup').style.display='none';$('call-decline').style.display='none';stopTimer();isCallActive=false}
-
 async function cleanupCall(){
   if(pc){pc.ontrack=null;pc.onicecandidate=null;pc.onconnectionstatechange=null;pc.close();pc=null}
   if(localStream){localStream.getTracks().forEach(t=>t.stop());localStream=null}
   if(callChannel){supabase.removeChannel(callChannel);callChannel=null}
   remoteAudio.srcObject=null;resetCallUI();
 }
-
 async function setupPeer(){
   pc=new RTCPeerConnection(ICE);
   pc.ontrack=e=>{remoteAudio.srcObject=e.streams[0]};
@@ -867,19 +1067,15 @@ async function setupPeer(){
   try{localStream=await navigator.mediaDevices.getUserMedia({audio:true,video:false});localStream.getTracks().forEach(t=>pc.addTrack(t,localStream));return true}
   catch(e){$('call-status').textContent='Нет микрофона';setTimeout(cleanupCall,2000);return false}
 }
-
 async function startCall(){
   if(isCallActive||!currentChatId||currentChatType!=='direct')return;
-  isCallActive=true;
-  callOverlay.classList.remove('hidden');
+  isCallActive=true;callOverlay.classList.remove('hidden');
   $('call-title').textContent=$('chat-title').textContent;
   $('call-avatar').outerHTML=avatarHtml($('chat-title').textContent,'',90).replace('class="avatar"','class="avatar" id="call-avatar"');
   $('call-status').textContent='Вызов...';
   $('call-accept').style.display='none';$('call-hangup').style.display='flex';$('call-decline').style.display='none';
-
   const ok=await setupPeer();if(!ok)return;
   const peer=currentChatPeer;if(!peer){$('call-status').textContent='Нет собеседника';setTimeout(cleanupCall,1500);return}
-
   callChannel=supabase.channel('user-'+peer,{config:{broadcast:{self:false}}});
   callChannel
     .on('broadcast',{event:'answer'},async({payload})=>{if(pc&&payload.sdp){await pc.setRemoteDescription(new RTCSessionDescription(payload.sdp));$('call-status').textContent='Соединение...'}})
@@ -893,7 +1089,6 @@ async function startCall(){
       }
     });
 }
-
 function setupGlobalCallListener(){
   if(window._globalCallChannel)supabase.removeChannel(window._globalCallChannel);
   window._globalCallChannel=supabase.channel('user-'+myPhone,{config:{broadcast:{self:false}}});
@@ -912,7 +1107,6 @@ function setupGlobalCallListener(){
     .on('broadcast',{event:'ice'},async({payload})=>{if(pc&&payload.candidate){try{await pc.addIceCandidate(new RTCIceCandidate(payload.candidate))}catch(e){}}})
     .subscribe();
 }
-
 $('call-accept').onclick=async()=>{
   $('call-accept').style.display='none';$('call-decline').style.display='none';$('call-hangup').style.display='flex';
   $('call-status').textContent='Соединение...';
@@ -921,32 +1115,18 @@ $('call-accept').onclick=async()=>{
 };
 $('call-decline').onclick=()=>{if(callChannel)callChannel.send({type:'broadcast',event:'decline',payload:{}});cleanupCall()};
 $('call-hangup').onclick=()=>{if(callChannel)callChannel.send({type:'broadcast',event:'hangup',payload:{}});cleanupCall()};
+$('call-btn').onclick=startCall;
 
 const installBtn=document.getElementById('install-btn');
 let deferredPrompt=null;
 function isAppInstalled(){
-  try{
-    if(window.matchMedia('(display-mode: standalone)').matches)return true;
-    if(window.navigator.standalone===true)return true;
-    if(document.referrer.includes('android-app://'))return true;
-  }catch(e){}
+  try{if(window.matchMedia('(display-mode: standalone)').matches)return true;if(window.navigator.standalone===true)return true;if(document.referrer.includes('android-app://'))return true}catch(e){}
   return false;
 }
-function hideInstallButton(){
-  if(installBtn&&installBtn.parentNode)installBtn.parentNode.removeChild(installBtn);
-  try{localStorage.setItem('pwa_installed','true')}catch(e){}
-}
+function hideInstallButton(){if(installBtn&&installBtn.parentNode)installBtn.parentNode.removeChild(installBtn);try{localStorage.setItem('pwa_installed','true')}catch(e){}}
 if(isAppInstalled()||localStorage.getItem('pwa_installed')==='true')hideInstallButton();
-window.addEventListener('beforeinstallprompt',e=>{
-  e.preventDefault();deferredPrompt=e;
-  if(installBtn&&!isAppInstalled())installBtn.classList.remove('hidden');
-});
-if(installBtn)installBtn.addEventListener('click',async()=>{
-  if(!deferredPrompt)return;
-  deferredPrompt.prompt();
-  try{await deferredPrompt.userChoice}catch(e){}
-  deferredPrompt=null;
-});
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;if(installBtn&&!isAppInstalled())installBtn.classList.remove('hidden');});
+if(installBtn)installBtn.addEventListener('click',async()=>{if(!deferredPrompt)return;deferredPrompt.prompt();try{await deferredPrompt.userChoice}catch(e){}deferredPrompt=null;});
 window.addEventListener('appinstalled',hideInstallButton);
 
 if('serviceWorker'in navigator){
